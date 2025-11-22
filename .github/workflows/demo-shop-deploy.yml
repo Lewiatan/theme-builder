@@ -63,14 +63,13 @@ jobs:
 
       - name: Link and Pull Vercel Project
         run: |
-          vercel link --yes --cwd=./demo-shop --token=${{ secrets.VERCEL_TOKEN }}
-          vercel pull --yes --cwd=./demo-shop --token=${{ secrets.VERCEL_TOKEN }}
+          vercel link --yes --token=${{ secrets.VERCEL_TOKEN }}
+          vercel pull --yes --token=${{ secrets.VERCEL_TOKEN }}
 
       - name: Deploy to Vercel
         id: deploy
         run: |
           DEPLOY_URL=$(vercel deploy \
-            --cwd=./demo-shop \
             ${{ (github.event_name == 'push' || github.event.inputs.deploy_to_production) && '--prod' || '' }} \
             --token=${{ secrets.VERCEL_TOKEN }} \
             --yes)

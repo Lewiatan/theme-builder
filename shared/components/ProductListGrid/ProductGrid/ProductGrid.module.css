@@ -1,0 +1,176 @@
+/* ============================================================================
+   ProductGrid Styles
+   ============================================================================ */
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(var(--grid-columns, 3), 1fr);
+  gap: 24px;
+  width: 100%;
+}
+
+/* Responsive Breakpoints
+   ========================================================================== */
+
+/* Mobile (< 640px): Force 1-2 columns regardless of config */
+@media (max-width: 639px) {
+  .grid[data-columns="2"],
+  .grid[data-columns="3"] {
+    grid-template-columns: repeat(1, 1fr);
+    gap: 16px;
+  }
+
+  .grid[data-columns="4"],
+  .grid[data-columns="6"] {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 16px;
+  }
+}
+
+/* Tablet (640px - 1024px): Reduce columns */
+@media (min-width: 640px) and (max-width: 1024px) {
+  .grid[data-columns="3"] {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 20px;
+  }
+
+  .grid[data-columns="4"] {
+    grid-template-columns: repeat(3, 1fr);
+    gap: 20px;
+  }
+
+  .grid[data-columns="6"] {
+    grid-template-columns: repeat(4, 1fr);
+    gap: 20px;
+  }
+}
+
+/* Desktop (> 1024px): Use configured columns */
+@media (min-width: 1025px) {
+  .grid {
+    grid-template-columns: repeat(var(--grid-columns, 3), 1fr);
+  }
+}
+
+/* Skeleton Loading State
+   ========================================================================== */
+
+.skeletonCard {
+  display: flex;
+  flex-direction: column;
+  background: #ffffff;
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.skeletonImage {
+  width: 100%;
+  aspect-ratio: 1 / 1;
+  background: linear-gradient(
+    90deg,
+    #f3f4f6 0%,
+    #e5e7eb 50%,
+    #f3f4f6 100%
+  );
+  background-size: 200% 100%;
+  animation: shimmer 1.5s infinite;
+}
+
+.skeletonContent {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 16px;
+}
+
+.skeletonTitle {
+  height: 16px;
+  background: linear-gradient(
+    90deg,
+    #f3f4f6 0%,
+    #e5e7eb 50%,
+    #f3f4f6 100%
+  );
+  background-size: 200% 100%;
+  border-radius: 4px;
+  animation: shimmer 1.5s infinite;
+}
+
+.skeletonTitleShort {
+  height: 16px;
+  width: 60%;
+  background: linear-gradient(
+    90deg,
+    #f3f4f6 0%,
+    #e5e7eb 50%,
+    #f3f4f6 100%
+  );
+  background-size: 200% 100%;
+  border-radius: 4px;
+  animation: shimmer 1.5s infinite;
+  animation-delay: 0.1s;
+}
+
+.skeletonPrice {
+  height: 20px;
+  width: 40%;
+  margin-top: 8px;
+  background: linear-gradient(
+    90deg,
+    #f3f4f6 0%,
+    #e5e7eb 50%,
+    #f3f4f6 100%
+  );
+  background-size: 200% 100%;
+  border-radius: 4px;
+  animation: shimmer 1.5s infinite;
+  animation-delay: 0.2s;
+}
+
+.skeletonButton {
+  height: 40px;
+  margin-top: 8px;
+  background: linear-gradient(
+    90deg,
+    #f3f4f6 0%,
+    #e5e7eb 50%,
+    #f3f4f6 100%
+  );
+  background-size: 200% 100%;
+  border-radius: 6px;
+  animation: shimmer 1.5s infinite;
+  animation-delay: 0.3s;
+}
+
+@keyframes shimmer {
+  0% {
+    background-position: -200% 0;
+  }
+  100% {
+    background-position: 200% 0;
+  }
+}
+
+/* Responsive Skeleton Adjustments
+   ========================================================================== */
+
+@media (max-width: 640px) {
+  .skeletonContent {
+    padding: 12px;
+    gap: 10px;
+  }
+
+  .skeletonTitle,
+  .skeletonTitleShort {
+    height: 14px;
+  }
+
+  .skeletonPrice {
+    height: 18px;
+  }
+
+  .skeletonButton {
+    height: 36px;
+  }
+}

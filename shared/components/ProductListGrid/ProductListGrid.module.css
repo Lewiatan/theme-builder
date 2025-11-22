@@ -1,0 +1,177 @@
+/* ============================================================================
+   ProductListGrid Main Component Styles
+   ============================================================================ */
+
+.container {
+  width: 100%;
+  padding: 24px 0;
+}
+
+/* Error State
+   ========================================================================== */
+
+.errorState {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 64px 24px;
+  text-align: center;
+  max-width: 480px;
+  margin: 0 auto;
+}
+
+.errorIcon {
+  width: 64px;
+  height: 64px;
+  color: #dc2626;
+  margin-bottom: 24px;
+}
+
+.errorTitle {
+  font-size: 24px;
+  font-weight: 700;
+  color: #111827;
+  margin: 0 0 12px 0;
+}
+
+.errorMessage {
+  font-size: 16px;
+  color: #6b7280;
+  margin: 0 0 24px 0;
+  line-height: 1.6;
+}
+
+.retryButton {
+  padding: 12px 32px;
+  background-color: #3b82f6;
+  color: #ffffff;
+  border: none;
+  border-radius: 8px;
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background-color 0.2s ease, transform 0.1s ease;
+}
+
+.retryButton:hover {
+  background-color: #2563eb;
+  transform: translateY(-1px);
+}
+
+.retryButton:active {
+  transform: translateY(0);
+}
+
+.retryButton:focus {
+  outline: 2px solid #3b82f6;
+  outline-offset: 2px;
+}
+
+.retryButton:focus:not(:focus-visible) {
+  outline: none;
+}
+
+/* Empty State
+   ========================================================================== */
+
+.emptyState {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 64px 24px;
+  text-align: center;
+  max-width: 480px;
+  margin: 0 auto;
+}
+
+.emptyIcon {
+  width: 64px;
+  height: 64px;
+  color: #9ca3af;
+  margin-bottom: 24px;
+}
+
+.emptyTitle {
+  font-size: 24px;
+  font-weight: 700;
+  color: #111827;
+  margin: 0 0 12px 0;
+}
+
+.emptyMessage {
+  font-size: 16px;
+  color: #6b7280;
+  margin: 0 0 24px 0;
+  line-height: 1.6;
+}
+
+.browseAllButton {
+  display: inline-block;
+  padding: 12px 32px;
+  background-color: #3b82f6;
+  color: #ffffff;
+  text-decoration: none;
+  border-radius: 8px;
+  font-size: 16px;
+  font-weight: 600;
+  transition: background-color 0.2s ease, transform 0.1s ease;
+}
+
+.browseAllButton:hover {
+  background-color: #2563eb;
+  transform: translateY(-1px);
+}
+
+.browseAllButton:active {
+  transform: translateY(0);
+}
+
+.browseAllButton:focus {
+  outline: 2px solid #3b82f6;
+  outline-offset: 2px;
+}
+
+.browseAllButton:focus:not(:focus-visible) {
+  outline: none;
+}
+
+/* Responsive Adjustments
+   ========================================================================== */
+
+@media (max-width: 640px) {
+  .container {
+    padding: 16px 0;
+  }
+
+  .errorState,
+  .emptyState {
+    padding: 48px 16px;
+  }
+
+  .errorIcon,
+  .emptyIcon {
+    width: 48px;
+    height: 48px;
+    margin-bottom: 16px;
+  }
+
+  .errorTitle,
+  .emptyTitle {
+    font-size: 20px;
+    margin-bottom: 8px;
+  }
+
+  .errorMessage,
+  .emptyMessage {
+    font-size: 14px;
+    margin-bottom: 20px;
+  }
+
+  .retryButton,
+  .browseAllButton {
+    padding: 10px 24px;
+    font-size: 14px;
+  }
+}

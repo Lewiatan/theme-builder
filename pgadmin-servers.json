@@ -1,0 +1,13 @@
+{
+  "Servers": {
+    "1": {
+      "Name": "Theme Builder PostgreSQL",
+      "Group": "Servers",
+      "Host": "postgres",
+      "Port": 5432,
+      "MaintenanceDB": "builder",
+      "Username": "builder",
+      "SSLMode": "prefer"
+    }
+  }
+}

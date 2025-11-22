@@ -1,0 +1,16 @@
+version: '3.8'
+
+# Test environment override for Playwright E2E tests
+# This file extends docker-compose.yml and overrides backend to use test database
+
+services:
+  # Backend - Symfony API with TEST environment
+  backend:
+    environment:
+      APP_ENV: test
+      APP_SECRET: ${APP_SECRET}
+      DATABASE_URL: postgresql://builder:builder@postgres:5432/builder_test?serverVersion=16&charset=utf8
+      CORS_ALLOW_ORIGIN: ".*"
+      JWT_SECRET_KEY: "%kernel.project_dir%/config/jwt/private.pem"
+      JWT_PUBLIC_KEY: "%kernel.project_dir%/config/jwt/public.pem"
+      JWT_PASSPHRASE: ""

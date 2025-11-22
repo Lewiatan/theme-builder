@@ -1,0 +1,297 @@
+/* Base header styles */
+.header {
+  width: 100%;
+  background-color: #ffffff;
+  border-bottom: 1px solid #e5e7eb;
+  box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1);
+}
+
+.container {
+  max-width: 1280px;
+  margin: 0 auto;
+  padding: 1rem 1.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  position: relative;
+}
+
+/* Variant-specific header styles */
+.sticky {
+  position: sticky;
+  top: 0;
+  z-index: 100;
+}
+
+.static {
+  position: relative;
+}
+
+/* Header with centered logo */
+.headerLogoCenter .container {
+  flex-direction: column;
+  gap: 1rem;
+}
+
+/* Logo styles */
+.logoContainer {
+  display: flex;
+  align-items: center;
+}
+
+.logoLeft {
+  justify-content: flex-start;
+}
+
+.logoCenter {
+  justify-content: center;
+}
+
+.logo {
+  height: 40px;
+  width: auto;
+  object-fit: contain;
+}
+
+.fallbackLogo {
+  font-size: 1.5rem;
+  font-weight: bold;
+  color: #1f2937;
+}
+
+/* Navigation links */
+.navLinks {
+  display: flex;
+  gap: 2rem;
+  align-items: center;
+}
+
+.navLink {
+  color: #4b5563;
+  text-decoration: none;
+  font-weight: 500;
+  padding: 0.5rem 0;
+  position: relative;
+  transition: color 0.2s ease;
+}
+
+.navLink:hover {
+  color: #1f2937;
+}
+
+.navLink:focus {
+  outline: 2px solid #3b82f6;
+  outline-offset: 4px;
+  border-radius: 2px;
+}
+
+.navLink:active {
+  color: #3b82f6;
+}
+
+/* Desktop navigation - hidden on mobile */
+.desktopNav {
+  display: none;
+}
+
+@media (min-width: 768px) {
+  .desktopNav {
+    display: flex;
+  }
+}
+
+/* Mobile menu toggle button */
+.mobileMenuToggle {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 0.5rem;
+  color: #1f2937;
+}
+
+@media (min-width: 768px) {
+  .mobileMenuToggle {
+    display: none;
+  }
+}
+
+/* Hamburger icon */
+.hamburger {
+  display: block;
+  width: 24px;
+  height: 2px;
+  background-color: currentColor;
+  position: relative;
+  transition: background-color 0.2s ease;
+}
+
+.hamburger::before,
+.hamburger::after {
+  content: '';
+  position: absolute;
+  width: 24px;
+  height: 2px;
+  background-color: currentColor;
+  left: 0;
+  transition: transform 0.2s ease;
+}
+
+.hamburger::before {
+  top: -8px;
+}
+
+.hamburger::after {
+  bottom: -8px;
+}
+
+/* Mobile menu */
+.mobileMenu {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  right: 0;
+  background-color: #ffffff;
+  border-bottom: 1px solid #e5e7eb;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+  padding: 1rem 1.5rem;
+}
+
+.mobileMenu .navLinks {
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 1rem;
+}
+
+@media (min-width: 768px) {
+  .mobileMenu {
+    display: none;
+  }
+}
+
+/* Slide-in drawer variant */
+.drawerToggle {
+  position: fixed;
+  top: 1rem;
+  left: 1rem;
+  z-index: 110;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: #ffffff;
+  border: 1px solid #e5e7eb;
+  border-radius: 0.375rem;
+  padding: 0.75rem;
+  cursor: pointer;
+  box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1);
+  transition: background-color 0.2s ease;
+}
+
+.drawerToggle:hover {
+  background-color: #f9fafb;
+}
+
+.drawerToggle:focus {
+  outline: 2px solid #3b82f6;
+  outline-offset: 2px;
+}
+
+.drawer {
+  position: fixed;
+  top: 0;
+  left: 0;
+  bottom: 0;
+  width: 280px;
+  background-color: #ffffff;
+  border-right: 1px solid #e5e7eb;
+  box-shadow: 2px 0 8px rgba(0, 0, 0, 0.1);
+  padding: 2rem 1.5rem;
+  z-index: 105;
+  transition: transform 0.3s ease;
+  will-change: transform;
+  overflow-y: auto;
+}
+
+.drawerOpen {
+  transform: translateX(0);
+}
+
+.drawerClosed {
+  transform: translateX(-100%);
+}
+
+.drawer .logoContainer {
+  margin-bottom: 2rem;
+}
+
+.drawerLinks {
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 1.5rem;
+}
+
+.overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.5);
+  z-index: 100;
+  cursor: pointer;
+}
+
+/* Loading skeleton styles */
+.skeleton {
+  background: linear-gradient(
+    90deg,
+    #f3f4f6 0%,
+    #e5e7eb 50%,
+    #f3f4f6 100%
+  );
+  background-size: 200% 100%;
+  animation: shimmer 1.5s infinite;
+  border-radius: 0.25rem;
+}
+
+@keyframes shimmer {
+  0% {
+    background-position: -200% 0;
+  }
+  100% {
+    background-position: 200% 0;
+  }
+}
+
+.skeletonLogo {
+  width: 120px;
+  height: 40px;
+}
+
+.skeletonLink {
+  width: 80px;
+  height: 20px;
+}
+
+/* Error message */
+.errorMessage {
+  color: #dc2626;
+  font-size: 0.875rem;
+  padding: 0.5rem;
+  background-color: #fef2f2;
+  border: 1px solid #fecaca;
+  border-radius: 0.375rem;
+}
+
+/* Responsive adjustments */
+@media (max-width: 767px) {
+  .logo {
+    height: 32px;
+  }
+
+  .container {
+    padding: 0.75rem 1rem;
+  }
+}

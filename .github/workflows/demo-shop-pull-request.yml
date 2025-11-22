@@ -1,0 +1,310 @@
+name: Demo Shop - Pull Request CI
+
+on:
+  pull_request:
+    branches:
+      - main
+    paths:
+      - 'demo-shop/**'
+      - 'shared/**'
+      - '.github/workflows/demo-shop-pull-request.yml'
+
+jobs:
+  unit-test:
+    name: Unit Tests
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ./demo-shop
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v5
+
+      - name: Read Node version from .nvmrc
+        id: node-version
+        run: echo "NODE_VERSION=$(cat .nvmrc)" >> $GITHUB_OUTPUT
+        working-directory: ./demo-shop
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v6
+        with:
+          node-version: ${{ steps.node-version.outputs.NODE_VERSION }}
+          cache: 'npm'
+          cache-dependency-path: |
+            demo-shop/package-lock.json
+            shared/package-lock.json
+
+      - name: Install shared dependencies
+        run: npm ci
+        working-directory: ./shared
+
+      - name: Install demo-shop dependencies
+        run: npm ci
+
+      - name: Run unit tests with coverage
+        run: npm run test:run
+        env:
+          CI: true
+
+  e2e-test:
+    name: E2E Tests
+    runs-on: ubuntu-latest
+
+    services:
+      postgres:
+        image: postgres:16-alpine
+        env:
+          POSTGRES_DB: builder_test
+          POSTGRES_USER: builder
+          POSTGRES_PASSWORD: builder
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+        ports:
+          - 5432:5432
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v5
+
+      - name: Read Node version from .nvmrc
+        id: node-version
+        run: echo "NODE_VERSION=$(cat .nvmrc)" >> $GITHUB_OUTPUT
+        working-directory: ./demo-shop
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v6
+        with:
+          node-version: ${{ steps.node-version.outputs.NODE_VERSION }}
+          cache: 'npm'
+          cache-dependency-path: |
+            demo-shop/package-lock.json
+            shared/package-lock.json
+            theme-builder/package-lock.json
+            package-lock.json
+
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.3'
+          extensions: ctype, iconv, pdo, pdo_pgsql
+          coverage: none
+
+      - name: Setup backend environment
+        run: |
+          cp .env.example .env
+          cat >> .env << EOF
+          APP_ENV=test
+          APP_DEBUG=1
+          APP_SECRET=test-secret-for-ci
+          DATABASE_URL=postgresql://builder:builder@localhost:5432/builder_test?serverVersion=16&charset=utf8
+          CORS_ALLOW_ORIGIN=.*
+          EOF
+          # Create .env.test.local to override .env.test for CI (gitignored file)
+          cat > .env.test.local << EOF
+          # CI overrides for test environment
+          DATABASE_URL=postgresql://builder:builder@localhost:5432/builder_test?serverVersion=16&charset=utf8
+          EOF
+          echo "=== Created .env files ==="
+          echo "Contents of .env.test.local:"
+          cat .env.test.local
+        working-directory: ./backend
+
+      - name: Install backend dependencies
+        run: composer install --no-interaction --prefer-dist --optimize-autoloader
+        working-directory: ./backend
+        env:
+          DATABASE_URL: postgresql://builder:builder@localhost:5432/builder_test
+
+      - name: Generate JWT keys
+        run: |
+          mkdir -p config/jwt
+          openssl genrsa -out config/jwt/private.pem 4096
+          openssl rsa -pubout -in config/jwt/private.pem -out config/jwt/public.pem
+          chmod 644 config/jwt/private.pem config/jwt/public.pem
+        working-directory: ./backend
+
+      - name: Clear Symfony cache
+        run: php bin/console cache:clear --env=test
+        working-directory: ./backend
+        env:
+          DATABASE_URL: postgresql://builder:builder@localhost:5432/builder_test
+          APP_ENV: test
+          APP_DEBUG: 1
+
+      - name: Create Phinx config for CI
+        run: |
+          cat > phinx.ci.php << 'EOF'
+          <?php
+          return [
+              'paths' => [
+                  'migrations' => '%%PHINX_CONFIG_DIR%%/db/migrations',
+                  'seeds' => '%%PHINX_CONFIG_DIR%%/db/seeds'
+              ],
+              'environments' => [
+                  'default_migration_table' => 'phinxlog',
+                  'default_environment' => 'testing',
+                  'testing' => [
+                      'adapter' => 'pgsql',
+                      'host' => 'localhost',
+                      'name' => 'builder_test',
+                      'user' => 'builder',
+                      'pass' => 'builder',
+                      'port' => '5432',
+                      'charset' => 'utf8',
+                  ]
+              ],
+              'version_order' => 'creation'
+          ];
+          EOF
+        working-directory: ./backend
+
+      - name: Run database migrations
+        run: vendor/bin/phinx migrate -c phinx.ci.php
+        working-directory: ./backend
+
+      - name: Seed test database
+        run: vendor/bin/phinx seed:run -c phinx.ci.php
+        working-directory: ./backend
+
+      - name: Start backend server
+        run: |
+          nohup php -S localhost:8000 -t public > backend.log 2>&1 &
+          echo $! > backend.pid
+        working-directory: ./backend
+        env:
+          APP_ENV: test
+          APP_DEBUG: 1
+          DATABASE_URL: postgresql://builder:builder@localhost:5432/builder_test
+
+      - name: Install shared dependencies
+        run: npm ci
+        working-directory: ./shared
+
+      - name: Install theme-builder dependencies
+        run: npm ci
+        working-directory: ./theme-builder
+
+      - name: Start theme-builder dev server
+        run: |
+          nohup npm run dev -- --host 0.0.0.0 > theme-builder.log 2>&1 &
+          echo $! > theme-builder.pid
+        working-directory: ./theme-builder
+        env:
+          VITE_API_URL: http://localhost:8000
+
+      - name: Install demo-shop dependencies
+        run: npm ci
+        working-directory: ./demo-shop
+
+      - name: Start demo-shop dev server
+        run: |
+          nohup npm run dev -- --host 0.0.0.0 > demo-shop.log 2>&1 &
+          echo $! > demo-shop.pid
+        working-directory: ./demo-shop
+        env:
+          VITE_API_URL: http://localhost:8000
+
+      - name: Install Playwright dependencies
+        run: npm ci
+
+      - name: Install Playwright browsers
+        run: npx playwright install --with-deps chromium
+
+      - name: Wait for services to be ready
+        run: |
+          echo "Checking if backend process is running..."
+          if [ -f backend/backend.pid ]; then
+            ps -p $(cat backend/backend.pid) || echo "Backend process not running!"
+          fi
+
+          echo "Waiting for backend to be ready..."
+          for i in {1..30}; do
+            if curl -f http://localhost:8000/health 2>/dev/null; then
+              echo "Backend is ready!"
+              break
+            fi
+            if [ $i -eq 30 ]; then
+              echo "Backend failed to start. Logs:"
+              cat backend/backend.log || echo "No backend logs found"
+              exit 1
+            fi
+            sleep 2
+          done
+
+          echo "Waiting for theme-builder to be ready..."
+          for i in {1..60}; do
+            if curl -f http://localhost:5173 2>/dev/null; then
+              echo "Theme-builder is ready!"
+              break
+            fi
+            if [ $i -eq 60 ]; then
+              echo "Theme-builder failed to start. Logs:"
+              cat theme-builder/theme-builder.log || echo "No theme-builder logs found"
+              exit 1
+            fi
+            sleep 2
+          done
+
+          echo "Waiting for demo-shop to be ready..."
+          for i in {1..60}; do
+            if curl -f http://localhost:5174 2>/dev/null; then
+              echo "Demo-shop is ready!"
+              break
+            fi
+            if [ $i -eq 60 ]; then
+              echo "Demo-shop failed to start. Logs:"
+              cat demo-shop/demo-shop.log || echo "No demo-shop logs found"
+              exit 1
+            fi
+            sleep 2
+          done
+
+          echo "All services are ready!"
+
+      - name: Test backend API manually
+        run: |
+          echo "=== Checking .env files in backend ==="
+          ls -la backend/.env* || true
+          echo ""
+          echo "=== Contents of .env.test.local ==="
+          cat backend/.env.test.local || echo ".env.test.local not found"
+          echo ""
+          echo "=== Testing health endpoint ==="
+          curl -v http://localhost:8000/health || true
+          echo ""
+          echo "=== Testing login endpoint ==="
+          curl -v -X POST http://localhost:8000/api/auth/login \
+            -H "Content-Type: application/json" \
+            -d '{"email":"demo@example.com","password":"test123"}' || true
+
+      - name: Run Playwright tests
+        run: npx playwright test
+        env:
+          CI: true
+          VITE_API_URL: http://localhost:8000
+
+      - name: Show backend logs on failure
+        if: failure()
+        run: |
+          echo "=== Backend Logs ==="
+          cat backend/backend.log || echo "No backend logs found"
+          echo ""
+          echo "=== Backend Process Status ==="
+          if [ -f backend/backend.pid ]; then
+            ps -p $(cat backend/backend.pid) || echo "Backend process not running"
+          fi
+          echo ""
+          echo "=== Last 50 lines of backend log ==="
+          tail -50 backend/backend.log || echo "Could not read backend logs"
+
+      - name: Upload Playwright report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-report
+          path: playwright-report/
+          retention-days: 30

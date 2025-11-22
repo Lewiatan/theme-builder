@@ -1,0 +1,207 @@
+/* ============================================================================
+   ProductCard Styles
+   ============================================================================ */
+
+.card {
+  display: flex;
+  flex-direction: column;
+  background: #ffffff;
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  overflow: hidden;
+  cursor: pointer;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  height: 100%;
+}
+
+.card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+}
+
+.card:focus {
+  outline: 2px solid #3b82f6;
+  outline-offset: 2px;
+}
+
+.card:focus:not(:focus-visible) {
+  outline: none;
+}
+
+/* Image Container
+   ========================================================================== */
+
+.imageContainer {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 1 / 1;
+  background-color: #f3f4f6;
+  overflow: hidden;
+}
+
+.image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.imageLoaded {
+  opacity: 1;
+}
+
+/* Image Loading Skeleton */
+.imageSkeleton {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(
+    90deg,
+    #f3f4f6 0%,
+    #e5e7eb 50%,
+    #f3f4f6 100%
+  );
+  background-size: 200% 100%;
+  animation: shimmer 1.5s infinite;
+}
+
+@keyframes shimmer {
+  0% {
+    background-position: -200% 0;
+  }
+  100% {
+    background-position: 200% 0;
+  }
+}
+
+/* Image Fallback */
+.imageFallback {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 100%;
+  background-color: #f9fafb;
+  color: #9ca3af;
+}
+
+.fallbackIcon {
+  width: 48px;
+  height: 48px;
+}
+
+/* Product Info
+   ========================================================================== */
+
+.info {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 16px;
+  flex: 1;
+}
+
+.name {
+  font-size: 16px;
+  font-weight: 600;
+  color: #111827;
+  margin: 0;
+  line-height: 1.4;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+}
+
+/* Price Container
+   ========================================================================== */
+
+.priceContainer {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin-top: auto;
+}
+
+.price {
+  font-size: 18px;
+  font-weight: 700;
+  color: #111827;
+}
+
+.salePrice {
+  font-size: 18px;
+  font-weight: 700;
+  color: #dc2626;
+}
+
+.originalPrice {
+  font-size: 14px;
+  font-weight: 400;
+  color: #6b7280;
+  text-decoration: line-through;
+}
+
+/* Add to Cart Button
+   ========================================================================== */
+
+.addToCartButton {
+  width: 100%;
+  padding: 10px 16px;
+  margin-top: 8px;
+  background-color: #3b82f6;
+  color: #ffffff;
+  border: none;
+  border-radius: 6px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+
+.addToCartButton:hover:not(:disabled) {
+  background-color: #2563eb;
+}
+
+.addToCartButton:disabled {
+  background-color: #d1d5db;
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+
+.addToCartButton:focus {
+  outline: 2px solid #3b82f6;
+  outline-offset: 2px;
+}
+
+.addToCartButton:focus:not(:focus-visible) {
+  outline: none;
+}
+
+/* Responsive Adjustments
+   ========================================================================== */
+
+@media (max-width: 640px) {
+  .info {
+    padding: 12px;
+  }
+
+  .name {
+    font-size: 14px;
+  }
+
+  .price,
+  .salePrice {
+    font-size: 16px;
+  }
+
+  .addToCartButton {
+    padding: 8px 12px;
+    font-size: 13px;
+  }
+}

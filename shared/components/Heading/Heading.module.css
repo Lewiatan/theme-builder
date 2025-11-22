@@ -1,0 +1,164 @@
+/**
+ * Heading Component Styles
+ *
+ * Provides styling for the Heading component with support for three variants:
+ * - text-only: Clean heading with no background
+ * - background-image: Heading displayed over a background image
+ * - background-color: Heading with a solid background color
+ */
+
+/* Base heading styles - inherits theme typography */
+.heading {
+  margin: 0;
+  padding: 0;
+  font-family: inherit;
+  line-height: 1.2;
+}
+
+/* Error state container */
+.errorContainer {
+  padding: 1rem;
+  border-left: 4px solid #ef4444;
+  background-color: #fef2f2;
+  border-radius: 0.375rem;
+}
+
+.errorHeading {
+  margin: 0 0 0.5rem 0;
+  color: #dc2626;
+  font-family: inherit;
+  line-height: 1.2;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.errorIcon {
+  font-size: 1.25em;
+  color: #f59e0b;
+}
+
+.errorMessage {
+  margin: 0;
+  font-size: 0.875rem;
+  color: #991b1b;
+  line-height: 1.5;
+}
+
+/* Loading state container */
+.loadingContainer {
+  position: relative;
+  width: 100%;
+  overflow: hidden;
+  background-color: #f3f4f6;
+  border-radius: 0.5rem;
+}
+
+.skeleton {
+  position: absolute;
+  inset: 0;
+  background-color: #e5e7eb;
+  overflow: hidden;
+}
+
+.shimmer {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    rgba(255, 255, 255, 0.6) 50%,
+    transparent 100%
+  );
+  animation: shimmer 2s infinite;
+}
+
+@keyframes shimmer {
+  0% {
+    transform: translateX(-100%);
+  }
+  100% {
+    transform: translateX(100%);
+  }
+}
+
+/* Background image variant container */
+.backgroundImageContainer {
+  position: relative;
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  border-radius: 0.5rem;
+}
+
+/* Semi-transparent overlay for text readability */
+.overlay {
+  position: absolute;
+  inset: 0;
+  background-color: rgba(0, 0, 0, 0.3);
+  pointer-events: none;
+}
+
+/* Background color variant container */
+.backgroundColorContainer {
+  position: relative;
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 2rem;
+  border-radius: 0.5rem;
+}
+
+/* Centered heading for background variants */
+.centeredHeading {
+  position: relative;
+  z-index: 1;
+  margin: 0;
+  padding: 0 1rem;
+  font-family: inherit;
+  line-height: 1.2;
+  text-align: center;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .backgroundImageContainer,
+  .backgroundColorContainer {
+    min-height: 200px;
+  }
+
+  .centeredHeading {
+    font-size: 0.9em;
+  }
+
+  .errorContainer {
+    padding: 0.75rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .backgroundImageContainer,
+  .backgroundColorContainer {
+    min-height: 150px;
+  }
+
+  .centeredHeading {
+    font-size: 0.8em;
+    padding: 0 0.75rem;
+  }
+
+  .errorHeading {
+    font-size: 0.9em;
+  }
+
+  .errorMessage {
+    font-size: 0.8rem;
+  }
+}

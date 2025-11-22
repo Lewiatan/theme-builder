@@ -1,0 +1,14 @@
+parameters:
+    level: 5
+    paths:
+        - src
+        - tests
+    excludePaths:
+        - src/Kernel.php
+    doctrine:
+        objectManagerLoader: tests/object-manager.php
+    symfony:
+        container_xml_path: var/cache/dev/App_KernelDevDebugContainer.xml
+    ignoreErrors:
+        # Add specific errors to ignore here if needed
+    checkMissingIterableValueType: false

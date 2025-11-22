@@ -1,0 +1,4 @@
+doctrine:
+    dbal:
+        # Uses DATABASE_URL from .env.test which points to builder_test database
+        dbname_suffix: '_test'

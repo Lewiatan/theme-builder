@@ -1,0 +1,110 @@
+name: Demo Shop - Deploy to Vercel
+
+# Manual deployment workflow
+# Required GitHub Secrets (in 'production' environment):
+#   - VERCEL_TOKEN: Your Vercel authentication token
+#   - VERCEL_ORG_ID: Your Vercel organization/team ID
+#   - VERCEL_PROJECT_DEMO_SHOP_ID: The demo-shop project ID in Vercel
+#   - VITE_API_URL: (Optional) Production API URL (defaults to http://localhost:8000)
+#
+# To add secrets: Settings > Secrets and variables > Actions > New repository secret
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - 'demo-shop/**'
+      - 'shared/**'
+      - '.github/workflows/demo-shop-deploy.yml'
+  workflow_dispatch:
+    inputs:
+      deploy_to_production:
+        description: 'Deploy to production (unchecked = preview)'
+        required: false
+        type: boolean
+        default: true
+
+jobs:
+  deploy:
+    name: Deploy to Vercel
+    runs-on: ubuntu-latest
+    environment: production
+    defaults:
+      run:
+        working-directory: ./demo-shop
+    env:
+      VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
+      VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_DEMO_SHOP_ID }}
+      VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Read Node version from .nvmrc
+        id: node-version
+        run: echo "NODE_VERSION=$(cat .nvmrc)" >> $GITHUB_OUTPUT
+        working-directory: ./demo-shop
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ steps.node-version.outputs.NODE_VERSION }}
+          cache: 'npm'
+          cache-dependency-path: |
+            demo-shop/package-lock.json
+            shared/package-lock.json
+
+      - name: Install shared dependencies
+        run: npm ci
+        working-directory: ./shared
+
+      - name: Install demo-shop dependencies
+        run: npm ci
+
+      - name: Create .env file
+        run: |
+          echo "VITE_API_URL=${{ secrets.VITE_API_URL || 'http://localhost:8000' }}" > .env
+
+      - name: Run TypeScript type checking
+        run: npm run typecheck
+
+      - name: Run unit tests
+        run: npm test
+
+      - name: Build demo-shop
+        run: npm run build
+        env:
+          NODE_ENV: production
+
+      - name: Install Vercel CLI
+        run: npm install --global vercel@latest
+        working-directory: .
+
+      - name: Deploy to Vercel
+        id: deploy
+        env:
+          VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
+          VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_DEMO_SHOP_ID }}
+        run: |
+          # Link the project explicitly
+          vercel link --yes --token=${{ secrets.VERCEL_TOKEN }}
+
+          # Then deploy
+          DEPLOY_URL=$(vercel deploy \
+            ${{ (github.event_name == 'push' || github.event.inputs.deploy_to_production) && '--prod' || '' }} \
+            --token=${{ secrets.VERCEL_TOKEN }} \
+            --yes)
+          echo "DEPLOY_URL=$DEPLOY_URL" >> $GITHUB_OUTPUT
+          echo "Deployment URL: $DEPLOY_URL"
+
+      - name: Deployment summary
+        run: |
+          echo "## Deployment Successful!" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "**Environment:** ${{ (github.event_name == 'push' || github.event.inputs.deploy_to_production) && 'production' || 'preview' }}" >> $GITHUB_STEP_SUMMARY
+          echo "**Commit:** ${{ github.sha }}" >> $GITHUB_STEP_SUMMARY
+          echo "**Deployed by:** ${{ github.actor }}" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "**Deployment URL:** ${{ steps.deploy.outputs.DEPLOY_URL }}" >> $GITHUB_STEP_SUMMARY

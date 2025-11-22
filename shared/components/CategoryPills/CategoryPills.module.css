@@ -1,0 +1,237 @@
+/* Container for category pills */
+.container {
+  display: flex;
+  gap: 0.75rem;
+  padding: 1rem 0;
+  width: 100%;
+  overflow-x: auto;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(156, 163, 175, 0.5) transparent;
+}
+
+.container::-webkit-scrollbar {
+  height: 6px;
+}
+
+.container::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.container::-webkit-scrollbar-thumb {
+  background-color: rgba(156, 163, 175, 0.5);
+  border-radius: 3px;
+}
+
+.container::-webkit-scrollbar-thumb:hover {
+  background-color: rgba(107, 114, 128, 0.7);
+}
+
+/* Variant: Pills aligned to the left */
+.left {
+  justify-content: flex-start;
+  flex-wrap: wrap;
+}
+
+/* Variant: Pills centered horizontally */
+.center {
+  justify-content: center;
+  flex-wrap: wrap;
+}
+
+/* Variant: Pills stretched to fill available width */
+.fullWidth {
+  justify-content: space-between;
+}
+
+.fullWidth .pill {
+  flex: 1 1 auto;
+  min-width: 100px;
+}
+
+/* Individual pill button */
+.pill {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.625rem 1.25rem;
+  font-size: 0.875rem;
+  font-weight: 500;
+  line-height: 1.25rem;
+  color: #4b5563;
+  background-color: #ffffff;
+  border: 1px solid #d1d5db;
+  border-radius: 9999px;
+  cursor: pointer;
+  transition: all 0.2s ease-in-out;
+  white-space: nowrap;
+  user-select: none;
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* Hover state */
+.pill:hover {
+  color: #1f2937;
+  background-color: #f9fafb;
+  border-color: #9ca3af;
+  transform: translateY(-1px);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+}
+
+/* Focus state for keyboard navigation */
+.pill:focus {
+  outline: 2px solid #3b82f6;
+  outline-offset: 2px;
+  border-color: #3b82f6;
+}
+
+/* Active state */
+.pill:active {
+  transform: translateY(0);
+  box-shadow: none;
+}
+
+/* Selected/Active pill */
+.pill.active {
+  color: #ffffff;
+  background-color: #3b82f6;
+  border-color: #3b82f6;
+  box-shadow: 0 1px 3px rgba(59, 130, 246, 0.3);
+}
+
+.pill.active:hover {
+  background-color: #2563eb;
+  border-color: #2563eb;
+  box-shadow: 0 2px 4px rgba(59, 130, 246, 0.4);
+}
+
+.pill.active:focus {
+  outline-color: #1d4ed8;
+}
+
+/* Loading skeleton */
+.skeletonPill {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  height: 38px;
+  min-width: 80px;
+  width: auto;
+  padding: 0.625rem 1.25rem;
+  background-color: #f3f4f6;
+  border-radius: 9999px;
+  overflow: hidden;
+}
+
+.shimmer {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    rgba(255, 255, 255, 0.6) 50%,
+    transparent 100%
+  );
+  background-size: 200% 100%;
+  animation: shimmer 1.5s infinite;
+}
+
+@keyframes shimmer {
+  0% {
+    background-position: -200% 0;
+  }
+  100% {
+    background-position: 200% 0;
+  }
+}
+
+/* Error container */
+.errorContainer {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 1rem;
+  background-color: #fef2f2;
+  border: 1px solid #fecaca;
+  border-radius: 0.5rem;
+  margin: 1rem 0;
+}
+
+.errorIcon {
+  font-size: 1.25rem;
+  color: #dc2626;
+  flex-shrink: 0;
+}
+
+.errorMessage {
+  color: #991b1b;
+  font-size: 0.875rem;
+  line-height: 1.5;
+  margin: 0;
+}
+
+/* Empty state container */
+.emptyContainer {
+  display: flex;
+  justify-content: center;
+  padding: 2rem 1rem;
+}
+
+.emptyMessage {
+  color: #6b7280;
+  font-size: 0.875rem;
+  font-style: italic;
+  margin: 0;
+}
+
+/* Responsive adjustments */
+@media (max-width: 640px) {
+  .container {
+    padding: 0.75rem 0;
+    gap: 0.5rem;
+  }
+
+  .pill {
+    padding: 0.5rem 1rem;
+    font-size: 0.8125rem;
+  }
+
+  .skeletonPill {
+    height: 34px;
+    min-width: 70px;
+    padding: 0.5rem 1rem;
+  }
+
+  /* On mobile, prevent wrapping for better horizontal scroll experience */
+  .left,
+  .center {
+    flex-wrap: nowrap;
+  }
+}
+
+@media (max-width: 480px) {
+  .fullWidth .pill {
+    min-width: 80px;
+  }
+}
+
+/* CSS custom properties for theme integration */
+.pill {
+  color: var(--color-text-secondary, #4b5563);
+  background-color: var(--color-background, #ffffff);
+  border-color: var(--color-border, #d1d5db);
+}
+
+.pill.active {
+  color: var(--color-background, #ffffff);
+  background-color: var(--color-primary, #3b82f6);
+  border-color: var(--color-primary, #3b82f6);
+}
+
+.pill.active:hover {
+  background-color: var(--color-primary-dark, #2563eb);
+  border-color: var(--color-primary-dark, #2563eb);
+}

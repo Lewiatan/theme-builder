@@ -79,6 +79,7 @@ jobs:
           vercel build \
             ${{ (github.event_name == 'push' || github.event.inputs.deploy_to_production) && '--prod' || '' }} \
             --token=${{ secrets.VERCEL_TOKEN }}
+            --cwd=./demo-shop
 
       - name: Deploy to Vercel
         id: deploy

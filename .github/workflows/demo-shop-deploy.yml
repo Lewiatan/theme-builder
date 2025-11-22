@@ -62,11 +62,11 @@ jobs:
         run: |
           echo "VITE_API_URL=${{ secrets.VITE_API_URL || 'http://localhost:8000' }}" > .env
 
-      # - name: Run TypeScript type checking
-      #   run: npm run typecheck
+      - name: Run TypeScript type checking
+        run: npm run typecheck
 
-      # - name: Run unit tests
-      #   run: npm test
+      - name: Run unit tests
+        run: npm test
 
       - name: Install Vercel CLI
         run: npm install --global vercel@latest

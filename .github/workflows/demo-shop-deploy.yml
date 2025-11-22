@@ -45,7 +45,6 @@ jobs:
       - name: Read Node version from .nvmrc
         id: node-version
         run: echo "NODE_VERSION=$(cat .nvmrc)" >> $GITHUB_OUTPUT
-        working-directory: ./demo-shop
 
       - name: Setup Node.js
         uses: actions/setup-node@v4
@@ -55,10 +54,6 @@ jobs:
           cache-dependency-path: |
             demo-shop/package-lock.json
             shared/package-lock.json
-
-      - name: Install shared dependencies
-        run: npm ci
-        working-directory: ./shared
 
       - name: Install demo-shop dependencies
         run: npm ci
@@ -73,14 +68,17 @@ jobs:
       - name: Run unit tests
         run: npm test
 
-      - name: Build demo-shop
-        run: npm run build
-        env:
-          NODE_ENV: production
-
       - name: Install Vercel CLI
         run: npm install --global vercel@latest
-        working-directory: .
+
+      - name: Build with Vercel
+        env:
+          VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
+          VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_DEMO_SHOP_ID }}
+        run: |
+          vercel build \
+            ${{ (github.event_name == 'push' || github.event.inputs.deploy_to_production) && '--prod' || '' }} \
+            --token=${{ secrets.VERCEL_TOKEN }}
 
       - name: Deploy to Vercel
         id: deploy
@@ -88,10 +86,6 @@ jobs:
           VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
           VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_DEMO_SHOP_ID }}
         run: |
-          # Link the project explicitly
-          vercel link --yes --token=${{ secrets.VERCEL_TOKEN }}
-
-          # Then deploy
           DEPLOY_URL=$(vercel deploy \
             --debug \
             --prebuilt \

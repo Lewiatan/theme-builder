@@ -1,13 +1,13 @@
 name: Demo Shop - Deploy to Vercel
 
 on:
-  push:
-    branches:
-      - main
-    paths:
-      - 'demo-shop/**'
-      - 'shared/**'
-      - '.github/workflows/demo-shop-deploy.yml'
+  # push:
+  #   branches:
+  #     - main
+  #   paths:
+  #     - 'demo-shop/**'
+  #     - 'shared/**'
+  #     - '.github/workflows/demo-shop-deploy.yml'
   workflow_dispatch:
     inputs:
       deploy_to_production:

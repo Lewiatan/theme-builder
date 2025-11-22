@@ -10,7 +10,7 @@
   ],
   "functions": {
     "api/server.js": {
-      "runtime": "nodejs22.x",
+      "runtime": "nodejs20.x",
       "includeFiles": "build/**"
     }
   }

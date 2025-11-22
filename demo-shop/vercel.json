@@ -11,9 +11,7 @@
   "functions": {
     "api/server.js": {
       "runtime": "nodejs22.x",
-      "includeFiles": [
-        "build/**"
-      ]
+      "includeFiles": "build/**"
     }
   }
 }

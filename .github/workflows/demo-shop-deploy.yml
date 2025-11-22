@@ -1,14 +1,5 @@
 name: Demo Shop - Deploy to Vercel
 
-# Manual deployment workflow
-# Required GitHub Secrets (in 'production' environment):
-#   - VERCEL_TOKEN: Your Vercel authentication token
-#   - VERCEL_ORG_ID: Your Vercel organization/team ID
-#   - VERCEL_PROJECT_DEMO_SHOP_ID: The demo-shop project ID in Vercel
-#   - VITE_API_URL: (Optional) Production API URL (defaults to http://localhost:8000)
-#
-# To add secrets: Settings > Secrets and variables > Actions > New repository secret
-
 on:
   push:
     branches:
@@ -30,9 +21,6 @@ jobs:
     name: Deploy to Vercel
     runs-on: ubuntu-latest
     environment: production
-    defaults:
-      run:
-        working-directory: ./demo-shop
     env:
       VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
       VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_DEMO_SHOP_ID }}
@@ -44,7 +32,7 @@ jobs:
 
       - name: Read Node version from .nvmrc
         id: node-version
-        run: echo "NODE_VERSION=$(cat .nvmrc)" >> $GITHUB_OUTPUT
+        run: echo "NODE_VERSION=$(cat demo-shop/.nvmrc)" >> $GITHUB_OUTPUT
 
       - name: Setup Node.js
         uses: actions/setup-node@v4
@@ -55,48 +43,34 @@ jobs:
             demo-shop/package-lock.json
             shared/package-lock.json
 
-      - name: Install demo-shop dependencies
-        run: npm ci
+      - name: Install dependencies
+        run: |
+          npm ci --prefix=demo-shop
+          npm ci --prefix=shared
 
       - name: Create .env file
         run: |
-          echo "VITE_API_URL=${{ secrets.VITE_API_URL || 'http://localhost:8000' }}" > .env
+          echo "VITE_API_URL=${{ secrets.VITE_API_URL || 'http://localhost:8000' }}" > demo-shop/.env
 
       - name: Run TypeScript type checking
-        run: npm run typecheck
+        run: npm run typecheck --prefix=demo-shop
 
       - name: Run unit tests
-        run: npm test
+        run: npm test --prefix=demo-shop
 
       - name: Install Vercel CLI
         run: npm install --global vercel@latest
 
       - name: Link and Pull Vercel Project
-        env:
-          VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
-          VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_DEMO_SHOP_ID }}
         run: |
-          vercel link --yes --token=${{ secrets.VERCEL_TOKEN }}
-          vercel pull --yes --token=${{ secrets.VERCEL_TOKEN }}
-
-      - name: Build with Vercel
-        env:
-          VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
-          VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_DEMO_SHOP_ID }}
-        run: |
-          vercel build \
-            ${{ (github.event_name == 'push' || github.event.inputs.deploy_to_production) && '--prod' || '' }} \
-            --token=${{ secrets.VERCEL_TOKEN }}
+          vercel link --yes --cwd=./demo-shop --token=${{ secrets.VERCEL_TOKEN }}
+          vercel pull --yes --cwd=./demo-shop --token=${{ secrets.VERCEL_TOKEN }}
 
       - name: Deploy to Vercel
         id: deploy
-        env:
-          VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
-          VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_DEMO_SHOP_ID }}
         run: |
           DEPLOY_URL=$(vercel deploy \
-            --debug \
-            --prebuilt \
+            --cwd=./demo-shop \
             ${{ (github.event_name == 'push' || github.event.inputs.deploy_to_production) && '--prod' || '' }} \
             --token=${{ secrets.VERCEL_TOKEN }} \
             --yes)

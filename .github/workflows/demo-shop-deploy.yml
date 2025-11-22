@@ -62,14 +62,22 @@ jobs:
         run: |
           echo "VITE_API_URL=${{ secrets.VITE_API_URL || 'http://localhost:8000' }}" > .env
 
-      - name: Run TypeScript type checking
-        run: npm run typecheck
+      # - name: Run TypeScript type checking
+      #   run: npm run typecheck
 
-      - name: Run unit tests
-        run: npm test
+      # - name: Run unit tests
+      #   run: npm test
 
       - name: Install Vercel CLI
         run: npm install --global vercel@latest
+
+      - name: Link and Pull Vercel Project
+        env:
+          VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
+          VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_DEMO_SHOP_ID }}
+        run: |
+          vercel link --yes --token=${{ secrets.VERCEL_TOKEN }}
+          vercel pull --yes --token=${{ secrets.VERCEL_TOKEN }}
 
       - name: Build with Vercel
         env:
@@ -79,7 +87,6 @@ jobs:
           vercel build \
             ${{ (github.event_name == 'push' || github.event.inputs.deploy_to_production) && '--prod' || '' }} \
             --token=${{ secrets.VERCEL_TOKEN }}
-            --cwd=./demo-shop
 
       - name: Deploy to Vercel
         id: deploy

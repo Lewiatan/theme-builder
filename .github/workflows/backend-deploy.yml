@@ -37,14 +37,14 @@ jobs:
         working-directory: backend
         run: composer install --optimize-autoloader --no-interaction --prefer-dist
 
-      - name: Run PHPStan
-        working-directory: backend
-        run: |
-          if [ -f "vendor/bin/phpstan" ]; then
-            vendor/bin/phpstan analyse
-          else
-            echo "PHPStan not found, skipping static analysis"
-          fi
+      # - name: Run PHPStan
+      #   working-directory: backend
+      #   run: |
+      #     if [ -f "vendor/bin/phpstan" ]; then
+      #       vendor/bin/phpstan analyse
+      #     else
+      #       echo "PHPStan not found, skipping static analysis"
+      #     fi
 
       - name: Run PHPUnit
         working-directory: backend

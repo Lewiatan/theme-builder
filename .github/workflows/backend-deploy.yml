@@ -120,7 +120,9 @@ jobs:
             php bin/console cache:warmup --env=prod
 
             # Set proper permissions
+            chgrp -R www-data var/
             chmod -R 775 var/
+            chmod -R g+s var/
             chmod -R 644 config/jwt/*.pem 2>/dev/null || true
 
             echo "Deployment completed successfully!"

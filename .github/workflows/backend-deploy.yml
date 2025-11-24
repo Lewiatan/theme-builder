@@ -112,6 +112,17 @@ jobs:
             # Install dependencies
             composer install --no-dev --optimize-autoloader --no-interaction
 
+            # Generate JWT keys if they don't exist
+            if [ ! -f config/jwt/private.pem ]; then
+              php bin/console lexik:jwt:generate-keypair --skip-if-exists
+              chgrp www-data config/jwt/*.pem
+              chmod 640 config/jwt/private.pem
+              chmod 644 config/jwt/public.pem
+              echo "JWT keys generated"
+            else
+              echo "JWT keys already exist, skipping generation"
+            fi
+
             # Parse DATABASE_URL and export as PHINX_* environment variables
             DB_URL="${{ secrets.DATABASE_URL }}"
             export PHINX_DBUSER=$(echo $DB_URL | sed -n 's|.*://\([^:]*\):.*|\1|p')
@@ -132,7 +143,9 @@ jobs:
             chgrp -R www-data var/
             chmod -R 775 var/
             chmod -R g+s var/
-            chmod -R 644 config/jwt/*.pem 2>/dev/null || true
+            chmod 644 config/jwt/public.pem 2>/dev/null || true
+            chmod 640 config/jwt/private.pem 2>/dev/null || true
+            chgrp www-data config/jwt/*.pem 2>/dev/null || true
 
             echo "Deployment completed successfully!"
           ENDSSH

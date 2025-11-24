@@ -19,12 +19,8 @@ return
             'charset' => 'utf8',
         ],
         'production' => [
-            'adapter' => 'psql',
-            'host' => 'localhost',
-            'name' => 'production_db',
-            'user' => 'root',
-            'pass' => '',
-            'port' => '3306',
+            'adapter' => 'pgsql',
+            'connection' => getenv('DATABASE_URL') ?: 'postgresql://user:pass@localhost:5432/dbname',
             'charset' => 'utf8',
         ],
         'testing' => [

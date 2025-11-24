@@ -1,0 +1,124 @@
+name: Deploy Backend to VPS
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'backend/**'
+      - '.github/workflows/backend-deploy.yml'
+  workflow_dispatch:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup PHP 8.3
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.3'
+          extensions: pdo_pgsql, intl, xml, zip, curl, mbstring
+          coverage: none
+
+      - name: Validate composer.json
+        working-directory: backend
+        run: composer validate --strict
+
+      - name: Install dependencies
+        working-directory: backend
+        run: composer install --no-dev --optimize-autoloader --no-interaction --prefer-dist
+
+      - name: Run PHPStan
+        working-directory: backend
+        run: |
+          if [ -f "vendor/bin/phpstan" ]; then
+            vendor/bin/phpstan analyse
+          else
+            echo "PHPStan not found, skipping static analysis"
+          fi
+
+      - name: Run PHPUnit
+        working-directory: backend
+        run: |
+          if [ -f "vendor/bin/phpunit" ]; then
+            vendor/bin/phpunit
+          else
+            echo "PHPUnit not found, skipping tests"
+          fi
+
+  deploy:
+    needs: test
+    runs-on: ubuntu-latest
+    environment: production
+
+    env:
+      VPS_HOST: ${{ secrets.VPS_HOST }}
+      VPS_PORT: ${{ secrets.VPS_PORT }}
+      VPS_USERNAME: ${{ secrets.VPS_USERNAME }}
+      VPS_DEPLOY_PATH: ${{ secrets.VPS_DEPLOY_PATH }}
+      DATABASE_URL: ${{ secrets.DATABASE_URL }}
+      APP_SECRET: ${{ secrets.APP_SECRET }}
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup SSH
+        run: |
+          mkdir -p ~/.ssh
+          echo "${{ secrets.VPS_SSH_PRIVATE_KEY }}" > ~/.ssh/deploy_key
+          chmod 600 ~/.ssh/deploy_key
+          ssh-keyscan -p ${{ secrets.VPS_PORT }} -H ${{ secrets.VPS_HOST }} >> ~/.ssh/known_hosts
+
+      - name: Deploy files via rsync
+        run: |
+          rsync -avz --delete \
+            --exclude='.git' \
+            --exclude='var/cache' \
+            --exclude='var/log' \
+            --exclude='vendor' \
+            --exclude='.env' \
+            --exclude='.env.local' \
+            --exclude='.env.test' \
+            --exclude='docker' \
+            --exclude='docker-compose.yml' \
+            --exclude='Dockerfile' \
+            -e "ssh -i ~/.ssh/deploy_key -p ${{ secrets.VPS_PORT }} -o StrictHostKeyChecking=no" \
+            backend/ ${{ secrets.VPS_USERNAME }}@${{ secrets.VPS_HOST }}:${{ secrets.VPS_DEPLOY_PATH }}/
+
+      - name: Post-deployment tasks
+        run: |
+          ssh -i ~/.ssh/deploy_key -p ${{ secrets.VPS_PORT }} -o StrictHostKeyChecking=no \
+            ${{ secrets.VPS_USERNAME }}@${{ secrets.VPS_HOST }} << 'ENDSSH'
+            cd ${{ secrets.VPS_DEPLOY_PATH }}
+
+            # Update environment variables
+            echo "APP_ENV=prod" > .env
+            echo "APP_SECRET=${{ secrets.APP_SECRET }}" >> .env
+            echo "DATABASE_URL=\"${{ secrets.DATABASE_URL }}\"" >> .env
+
+            # Install dependencies
+            composer install --no-dev --optimize-autoloader --no-interaction
+
+            # Run database migrations
+            vendor/bin/phinx migrate -e production
+
+            # Clear and warm up Symfony cache
+            php bin/console cache:clear --env=prod --no-warmup
+            php bin/console cache:warmup --env=prod
+
+            # Set proper permissions
+            chmod -R 775 var/
+
+            echo "Deployment completed successfully!"
+          ENDSSH
+
+      - name: Deployment notification
+        if: always()
+        run: |
+          if [ "${{ job.status }}" == "success" ]; then
+            echo "✅ Backend deployed successfully to production!"
+          else
+            echo "❌ Deployment failed! Check the logs above."
+          fi

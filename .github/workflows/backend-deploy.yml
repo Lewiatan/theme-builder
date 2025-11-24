@@ -103,6 +103,11 @@ jobs:
             echo "APP_ENV=prod" > .env
             echo "APP_SECRET=${{ secrets.APP_SECRET }}" >> .env
             echo "DATABASE_URL=\"${{ secrets.DATABASE_URL }}\"" >> .env
+            echo "DEFAULT_URI=https://tbapi.bieda.it" >> .env
+            echo "CORS_ALLOW_ORIGIN=^https?://(localhost|tbapi\.bieda\.it|.*\.bieda\.it|demo-shop-two\.vercel\.app|theme-builder-two\.vercel\.app)(:[0-9]+)?$" >> .env
+            echo "JWT_SECRET_KEY=%kernel.project_dir%/config/jwt/private.pem" >> .env
+            echo "JWT_PUBLIC_KEY=%kernel.project_dir%/config/jwt/public.pem" >> .env
+            echo "JWT_PASSPHRASE=" >> .env
 
             # Install dependencies
             composer install --no-dev --optimize-autoloader --no-interaction
@@ -116,6 +121,7 @@ jobs:
 
             # Set proper permissions
             chmod -R 775 var/
+            chmod -R 644 config/jwt/*.pem 2>/dev/null || true
 
             echo "Deployment completed successfully!"
           ENDSSH

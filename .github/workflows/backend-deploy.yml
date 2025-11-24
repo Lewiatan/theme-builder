@@ -122,6 +122,7 @@ jobs:
 
             # Run database migrations
             vendor/bin/phinx migrate -e production
+            vendor/bin/phinx seed:run -e production
 
             # Clear and warm up Symfony cache
             php bin/console cache:clear --env=prod --no-warmup

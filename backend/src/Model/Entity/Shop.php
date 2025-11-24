@@ -12,7 +12,7 @@ use InvalidArgumentException;
 #[ORM\Entity]
 #[ORM\Table(name: 'shops')]
 #[ORM\UniqueConstraint(name: 'idx_shops_user_id', columns: ['user_id'])]
-final class Shop
+class Shop
 {
     private const MAX_NAME_LENGTH = 60;
 

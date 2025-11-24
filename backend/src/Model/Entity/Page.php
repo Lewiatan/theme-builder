@@ -12,7 +12,7 @@ use Doctrine\ORM\Mapping as ORM;
 #[ORM\Entity(repositoryClass: \App\Repository\DemoPageRepository::class)]
 #[ORM\Table(name: 'pages')]
 #[ORM\UniqueConstraint(name: 'idx_pages_shop_type', columns: ['shop_id', 'type'])]
-final class Page
+class Page
 {
     public function __construct(
         #[ORM\Id]

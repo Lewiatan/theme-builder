@@ -26,6 +26,13 @@ jobs:
         working-directory: backend
         run: composer validate --strict
 
+      - name: Create test .env file
+        working-directory: backend
+        run: |
+          echo "APP_ENV=test" > .env
+          echo "APP_SECRET=test-secret-key" >> .env
+          echo "DATABASE_URL=postgresql://test:test@localhost:5432/test" >> .env
+
       - name: Install dependencies
         working-directory: backend
         run: composer install --no-dev --optimize-autoloader --no-interaction --prefer-dist

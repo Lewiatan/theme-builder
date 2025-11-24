@@ -43,7 +43,7 @@ final class InitialSchemaSetup extends AbstractMigration
             -- Stores user authentication and account information.
             --
             create table users (
-                id uuid primary key default gen_random_uuid(),
+                id uuid primary key,
                 email varchar(255) not null,
                 password varchar(255) not null,
                 created_at timestamptz not null default now(),
@@ -60,7 +60,7 @@ final class InitialSchemaSetup extends AbstractMigration
             -- A user can only have one shop (enforced by a unique constraint on user_id).
             --
             create table shops (
-                id uuid primary key default gen_random_uuid(),
+                id uuid primary key,
                 user_id uuid not null references users(id) on delete cascade,
                 name varchar(60) not null,
                 theme_settings jsonb not null default '{}',
@@ -78,7 +78,7 @@ final class InitialSchemaSetup extends AbstractMigration
             -- Stores page layouts for each shop. Each shop can have one of each page type.
             --
             create table pages (
-                id uuid primary key default gen_random_uuid(),
+                id uuid primary key,
                 shop_id uuid not null references shops(id) on delete cascade,
                 type page_type_enum not null,
                 layout jsonb not null default '[]',

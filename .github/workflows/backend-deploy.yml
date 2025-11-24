@@ -113,6 +113,7 @@ jobs:
             composer install --no-dev --optimize-autoloader --no-interaction
 
             # Run database migrations
+            export PHINX_DBCONNECTION="${DATABASE_URL}"
             vendor/bin/phinx migrate -e production
 
             # Clear and warm up Symfony cache

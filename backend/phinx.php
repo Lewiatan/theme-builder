@@ -20,7 +20,7 @@ return
         ],
         'production' => [
             'adapter' => 'pgsql',
-            'connection' => getenv('DATABASE_URL') ?: 'postgresql://user:pass@localhost:5432/dbname',
+            'connection' => '%%PHINX_DBCONNECTION%%',
             'charset' => 'utf8',
         ],
         'testing' => [

@@ -78,13 +78,6 @@ jobs:
           chmod 600 ~/.ssh/deploy_key
           ssh-keyscan -p ${{ secrets.VPS_PORT }} -H ${{ secrets.VPS_HOST }} >> ~/.ssh/known_hosts
 
-      - name: Verify deployment directory permissions
-        run: |
-          ssh -i ~/.ssh/deploy_key -p ${{ secrets.VPS_PORT }} -o StrictHostKeyChecking=no \
-            ${{ secrets.VPS_USERNAME }}@${{ secrets.VPS_HOST }} \
-            "sudo chown -R ${{ secrets.VPS_USERNAME }}:www-data ${{ secrets.VPS_DEPLOY_PATH }}/ && \
-             sudo chmod -R 755 ${{ secrets.VPS_DEPLOY_PATH }}/"
-
       - name: Deploy files via rsync
         run: |
           rsync -avz --delete --force \

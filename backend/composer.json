@@ -1,4 +1,6 @@
 {
+    "name": "theme-builder/backend",
+    "description": "E-commerce Theme Builder Backend API",
     "type": "project",
     "license": "proprietary",
     "minimum-stability": "stable",

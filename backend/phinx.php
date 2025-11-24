@@ -20,7 +20,11 @@ return
         ],
         'production' => [
             'adapter' => 'pgsql',
-            'connection' => '%%PHINX_DBCONNECTION%%',
+            'host' => '%%PHINX_DBHOST%%',
+            'name' => '%%PHINX_DBNAME%%',
+            'user' => '%%PHINX_DBUSER%%',
+            'pass' => '%%PHINX_DBPASS%%',
+            'port' => '%%PHINX_DBPORT%%',
             'charset' => 'utf8',
         ],
         'testing' => [

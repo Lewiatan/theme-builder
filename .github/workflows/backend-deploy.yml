@@ -115,9 +115,9 @@ jobs:
             # Generate JWT keys if they don't exist
             if [ ! -f config/jwt/private.pem ]; then
               php bin/console lexik:jwt:generate-keypair --skip-if-exists
-              chgrp www-data config/jwt/*.pem
-              chmod 640 config/jwt/private.pem
-              chmod 644 config/jwt/public.pem
+              chgrp www-data config/jwt/*.pem 2>/dev/null || true
+              chmod 640 config/jwt/private.pem 2>/dev/null || true
+              chmod 644 config/jwt/public.pem 2>/dev/null || true
               echo "JWT keys generated"
             else
               echo "JWT keys already exist, skipping generation"
@@ -140,9 +140,9 @@ jobs:
             php bin/console cache:warmup --env=prod
 
             # Set proper permissions
-            chgrp -R www-data var/
-            chmod -R 775 var/
-            chmod -R g+s var/
+            chgrp -R www-data var/ 2>/dev/null || true
+            chmod -R 775 var/ 2>/dev/null || true
+            chmod -R g+s var/ 2>/dev/null || true
             chmod 644 config/jwt/public.pem 2>/dev/null || true
             chmod 640 config/jwt/private.pem 2>/dev/null || true
             chgrp www-data config/jwt/*.pem 2>/dev/null || true

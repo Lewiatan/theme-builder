@@ -87,6 +87,7 @@ jobs:
             --exclude='.env' \
             --exclude='.env.local' \
             --exclude='.env.test' \
+            --exclude='phinx.production.php' \
             --exclude='docker/' \
             --exclude='docker-compose.yml' \
             --exclude='Dockerfile' \
@@ -112,9 +113,24 @@ jobs:
             # Install dependencies
             composer install --no-dev --optimize-autoloader --no-interaction
 
-            # Run database migrations
-            export PHINX_DBCONNECTION="${DATABASE_URL}"
-            vendor/bin/phinx migrate -e production
+            # Parse DATABASE_URL and create production phinx config from template
+            DB_URL="${{ secrets.DATABASE_URL }}"
+            DB_USER=$(echo $DB_URL | sed -n 's|.*://\([^:]*\):.*|\1|p')
+            DB_PASS=$(echo $DB_URL | sed -n 's|.*://[^:]*:\([^@]*\)@.*|\1|p')
+            DB_HOST=$(echo $DB_URL | sed -n 's|.*@\([^:]*\):.*|\1|p')
+            DB_PORT=$(echo $DB_URL | sed -n 's|.*:\([0-9]*\)/.*|\1|p')
+            DB_NAME=$(echo $DB_URL | sed -n 's|.*/\([^?]*\).*|\1|p')
+
+            # Generate phinx config from template
+            cp phinx.production.php.template phinx.production.php
+            sed -i "s/{{DB_HOST}}/$DB_HOST/g" phinx.production.php
+            sed -i "s/{{DB_NAME}}/$DB_NAME/g" phinx.production.php
+            sed -i "s/{{DB_USER}}/$DB_USER/g" phinx.production.php
+            sed -i "s/{{DB_PASS}}/$DB_PASS/g" phinx.production.php
+            sed -i "s/{{DB_PORT}}/$DB_PORT/g" phinx.production.php
+
+            # Run database migrations with production config
+            vendor/bin/phinx migrate -c phinx.production.php -e production
 
             # Clear and warm up Symfony cache
             php bin/console cache:clear --env=prod --no-warmup

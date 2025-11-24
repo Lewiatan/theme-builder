@@ -1,0 +1,21 @@
+<?php
+return [
+    'paths' => [
+        'migrations' => __DIR__ . '/db/migrations',
+        'seeds' => __DIR__ . '/db/seeds'
+    ],
+    'environments' => [
+        'default_migration_table' => 'phinxlog',
+        'default_environment' => 'production',
+        'production' => [
+            'adapter' => 'pgsql',
+            'host' => '{{DB_HOST}}',
+            'name' => '{{DB_NAME}}',
+            'user' => '{{DB_USER}}',
+            'pass' => '{{DB_PASS}}',
+            'port' => '{{DB_PORT}}',
+            'charset' => 'utf8',
+        ],
+    ],
+    'version_order' => 'creation'
+];

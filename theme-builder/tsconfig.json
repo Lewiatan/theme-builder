@@ -26,5 +26,5 @@
       "@shared/components/*": ["../shared/components/*"]
     }
   },
-  "include": ["src"]
+  "include": ["src", "tests"]
 }

@@ -122,7 +122,7 @@ export function LoginForm() {
           Theme Builder Login
         </h1>
 
-        <form onSubmit={handleSubmit} className="space-y-4">
+        <form onSubmit={handleSubmit} className="space-y-4" noValidate>
           {/* API Error Alert */}
           {apiError && (
             <Alert variant="destructive">
@@ -140,7 +140,6 @@ export function LoginForm() {
               onChange={handleEmailChange}
               placeholder="Enter your email"
               className={validationErrors.email ? 'border-red-500' : ''}
-              required
               disabled={isLoading}
             />
             {validationErrors.email && (
@@ -158,7 +157,6 @@ export function LoginForm() {
               onChange={handlePasswordChange}
               placeholder="Enter your password"
               className={validationErrors.password ? 'border-red-500' : ''}
-              required
               disabled={isLoading}
             />
             {validationErrors.password && (

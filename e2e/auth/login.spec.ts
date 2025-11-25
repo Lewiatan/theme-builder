@@ -1,0 +1,250 @@
+import { test, expect } from "@playwright/test";
+
+/**
+ * E2E tests for Login Flow
+ * Tests the complete user authentication workflow
+ */
+
+test.describe("Login Flow", () => {
+  test.beforeEach(async ({ page }) => {
+    // Clear localStorage before each test
+    await page.goto("/");
+    await page.evaluate(() => localStorage.clear());
+  });
+
+  test.describe("Successful Login", () => {
+    test("user can log in with valid credentials", async ({ page }) => {
+      await page.goto("/login");
+
+      // Fill login form with credentials from ExampleShopSeeder
+      await page.fill('input[type="email"]', "demo@example.com");
+      await page.fill('input[type="password"]', "test123");
+
+      // Submit form
+      await page.click('button[type="submit"]');
+
+      // Wait for navigation to workspace
+      await expect(page).toHaveURL("/");
+
+      // Verify workspace loaded
+      await expect(page.locator("text=Theme Builder")).toBeVisible();
+
+      // Verify token stored in localStorage
+      const token = await page.evaluate(() =>
+        localStorage.getItem("jwt_token"),
+      );
+      expect(token).toBeTruthy();
+      expect(token).toContain("eyJ"); // JWT tokens start with 'eyJ'
+    });
+
+    test("shows loading state during login", async ({ page }) => {
+      await page.goto("/login");
+
+      await page.fill('input[type="email"]', "demo@example.com");
+      await page.fill('input[type="password"]', "test123");
+
+      // Click submit
+      const submitButton = page.locator('button[type="submit"]');
+      await submitButton.click();
+
+      // Check for loading state
+      await expect(submitButton).toContainText("Logging in");
+      await expect(submitButton).toBeDisabled();
+
+      // Wait for completion
+      await expect(page).toHaveURL("/");
+    });
+  });
+
+  test.describe("Client-Side Validation", () => {
+    test("shows validation errors for empty fields", async ({ page }) => {
+      await page.goto("/login");
+
+      // Submit without filling fields
+      await page.click('button[type="submit"]');
+
+      // Verify validation errors
+      await expect(page.locator("text=/email is required/i")).toBeVisible();
+      await expect(page.locator("text=/password is required/i")).toBeVisible();
+
+      // Verify no navigation occurred
+      expect(page.url()).toContain("/login");
+    });
+
+    test("shows validation error for invalid email format", async ({
+      page,
+    }) => {
+      await page.goto("/login");
+
+      await page.fill('input[type="email"]', "invalid-email");
+      await page.fill('input[type="password"]', "password123");
+
+      await page.click('button[type="submit"]');
+
+      // Verify email format error
+      await expect(
+        page.locator("text=/please enter a valid email address/i"),
+      ).toBeVisible();
+    });
+
+    test("clears validation error when user starts typing", async ({
+      page,
+    }) => {
+      await page.goto("/login");
+
+      // Submit to trigger validation
+      await page.click('button[type="submit"]');
+
+      await expect(page.locator("text=/email is required/i")).toBeVisible();
+
+      // Start typing in email field
+      await page.fill('input[type="email"]', "t");
+
+      // Error should be cleared
+      await expect(page.locator("text=/email is required/i")).not.toBeVisible();
+    });
+  });
+
+  test.describe("Authentication Errors", () => {
+    test("shows error for invalid credentials", async ({ page }) => {
+      await page.goto("/login");
+
+      await page.fill('input[type="email"]', "nonexistent@example.com");
+      await page.fill('input[type="password"]', "wrongpassword");
+
+      await page.click('button[type="submit"]');
+
+      // Wait for error message
+      await expect(
+        page.locator("text=/invalid email or password/i"),
+      ).toBeVisible();
+
+      // Verify still on login page
+      expect(page.url()).toContain("/login");
+
+      // Verify no token stored
+      const token = await page.evaluate(() =>
+        localStorage.getItem("jwt_token"),
+      );
+      expect(token).toBeNull();
+    });
+  });
+
+  test.describe("Already Authenticated", () => {
+    test("redirects to workspace if already authenticated", async ({
+      page,
+    }) => {
+      // First, perform a successful login
+      await page.goto("/login");
+      await page.fill('input[type="email"]', "demo@example.com");
+      await page.fill('input[type="password"]', "test123");
+      await page.click('button[type="submit"]');
+
+      // Wait for navigation
+      await expect(page).toHaveURL("/");
+
+      // Try to navigate back to login
+      await page.goto("/login");
+
+      // Should redirect to workspace
+      await expect(page).toHaveURL("/");
+    });
+  });
+
+  test.describe("Error Recovery", () => {
+    test("user can retry after error", async ({ page }) => {
+      await page.goto("/login");
+
+      // Submit with invalid credentials
+      await page.fill('input[type="email"]', "wrong@example.com");
+      await page.fill('input[type="password"]', "wrongpassword");
+      await page.click('button[type="submit"]');
+
+      // Wait for error
+      await expect(
+        page.locator("text=/invalid email or password/i"),
+      ).toBeVisible();
+
+      // Clear and enter correct credentials
+      await page.fill('input[type="email"]', "demo@example.com");
+      await page.fill('input[type="password"]', "test123");
+      await page.click('button[type="submit"]');
+
+      // Verify successful login
+      await expect(page).toHaveURL("/");
+    });
+
+    test("error clears on new submission attempt", async ({ page }) => {
+      await page.goto("/login");
+
+      // Trigger error
+      await page.fill('input[type="email"]', "wrong@example.com");
+      await page.fill('input[type="password"]', "wrongpassword");
+      await page.click('button[type="submit"]');
+
+      await expect(
+        page.locator("text=/invalid email or password/i"),
+      ).toBeVisible();
+
+      // Start new attempt
+      await page.fill('input[type="email"]', "demo@example.com");
+      await page.click('button[type="submit"]');
+
+      // Error should be cleared during submission
+      await expect(
+        page.locator("text=/invalid email or password/i"),
+      ).not.toBeVisible();
+    });
+  });
+
+  test.describe("Responsive Design", () => {
+    test("login form works on mobile viewport", async ({ page }) => {
+      // Set mobile viewport
+      await page.setViewportSize({ width: 375, height: 667 });
+
+      await page.goto("/login");
+
+      // Verify form is visible and properly sized
+      const form = page.locator("form");
+      await expect(form).toBeVisible();
+
+      // Complete login flow on mobile
+      await page.fill('input[type="email"]', "demo@example.com");
+      await page.fill('input[type="password"]', "test123");
+      await page.click('button[type="submit"]');
+
+      // Verify successful login
+      await expect(page).toHaveURL("/");
+    });
+  });
+
+  test.describe("Accessibility", () => {
+    test("form inputs have proper labels", async ({ page }) => {
+      await page.goto("/login");
+
+      // Check that labels are associated with inputs
+      const emailLabel = page.locator("label", { hasText: /email/i });
+      const passwordLabel = page.locator("label", { hasText: /password/i });
+
+      await expect(emailLabel).toBeVisible();
+      await expect(passwordLabel).toBeVisible();
+
+      // Verify inputs can be found by their labels
+      await expect(page.getByLabelText(/email/i)).toBeVisible();
+      await expect(page.getByLabelText(/password/i)).toBeVisible();
+    });
+
+    test("form can be submitted with Enter key", async ({ page }) => {
+      await page.goto("/login");
+
+      await page.fill('input[type="email"]', "demo@example.com");
+      await page.fill('input[type="password"]', "test123");
+
+      // Press Enter in password field
+      await page.locator('input[type="password"]').press("Enter");
+
+      // Should trigger form submission
+      await expect(page).toHaveURL("/");
+    });
+  });
+});

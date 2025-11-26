@@ -12,9 +12,13 @@ export default defineConfig({
     tsconfigPaths()
   ],
   resolve: {
+    dedupe: ['react', 'react-dom', 'react-router-dom', 'zod'],
     alias: {
-      // Ensure shared components can resolve dependencies from theme-builder's node_modules
+      // Ensure shared components use the same dependency instances
+      react: path.resolve(__dirname, 'node_modules/react'),
+      'react-dom': path.resolve(__dirname, 'node_modules/react-dom'),
       'react-router-dom': path.resolve(__dirname, 'node_modules/react-router-dom'),
+      zod: path.resolve(__dirname, 'node_modules/zod'),
     },
   },
 })

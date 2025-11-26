@@ -1,6 +1,6 @@
 import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { vi, describe, it, expect, beforeEach, beforeAll, afterEach, afterAll } from 'vitest';
+import { vi, describe, it, expect, beforeAll, afterEach, afterAll } from 'vitest';
 import { BrowserRouter } from 'react-router-dom';
 import { LoginForm } from '@/components/auth/LoginForm';
 import { server } from '../../../mocks/server';

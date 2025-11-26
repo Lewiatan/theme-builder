@@ -2,7 +2,7 @@
 
 /**
  * Gets the appropriate API URL based on execution context
- * - Server-side (SSR loader): Use Docker service networking (nginx:80)
+ * - Server-side (SSR loader): Use environment variable or Docker service networking (nginx:80)
  * - Client-side (browser): Use environment variable (localhost:8000)
  */
 function getApiUrl(): string {
@@ -10,8 +10,8 @@ function getApiUrl(): string {
   const isServerSide = typeof window === 'undefined';
 
   if (isServerSide) {
-    // Server-side: Use Docker service name for internal networking
-    return 'http://nginx:80';
+    // Server-side: Use environment variable (for Vercel/production) or Docker service name (for local dev)
+    return process.env.VITE_API_URL || 'http://nginx:80';
   }
 
   // Client-side: Use environment variable for browser requests

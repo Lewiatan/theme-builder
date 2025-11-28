@@ -26,7 +26,7 @@ final class ComponentDefinitionTest extends TestCase
         $this->assertSame('comp-123', $component->getId());
         $this->assertSame('hero', $component->getType());
         $this->assertSame('default', $component->getVariant());
-        $this->assertSame(['title' => 'Welcome'], $component->getSettings());
+        $this->assertSame(['title' => 'Welcome'], $component->getProps());
     }
 
     #[Test]
@@ -36,7 +36,7 @@ final class ComponentDefinitionTest extends TestCase
             'id' => 'comp-456',
             'type' => 'footer',
             'variant' => 'minimal',
-            'settings' => ['links' => ['About', 'Contact']],
+            'props' => ['links' => ['About', 'Contact']],
         ];
 
         $component = ComponentDefinition::fromArray($data);
@@ -44,7 +44,7 @@ final class ComponentDefinitionTest extends TestCase
         $this->assertSame('comp-456', $component->getId());
         $this->assertSame('footer', $component->getType());
         $this->assertSame('minimal', $component->getVariant());
-        $this->assertSame(['links' => ['About', 'Contact']], $component->getSettings());
+        $this->assertSame(['links' => ['About', 'Contact']], $component->getProps());
     }
 
     #[Test]
@@ -53,7 +53,7 @@ final class ComponentDefinitionTest extends TestCase
         $data = [
             'type' => 'hero',
             'variant' => 'default',
-            'settings' => [],
+            'props' => [],
         ];
 
         $this->expectException(InvalidArgumentException::class);
@@ -68,7 +68,7 @@ final class ComponentDefinitionTest extends TestCase
         $data = [
             'id' => 'comp-123',
             'variant' => 'default',
-            'settings' => [],
+            'props' => [],
         ];
 
         $this->expectException(InvalidArgumentException::class);
@@ -83,7 +83,7 @@ final class ComponentDefinitionTest extends TestCase
         $data = [
             'id' => 'comp-123',
             'type' => 'hero',
-            'settings' => [],
+            'props' => [],
         ];
 
         $this->expectException(InvalidArgumentException::class);
@@ -93,7 +93,7 @@ final class ComponentDefinitionTest extends TestCase
     }
 
     #[Test]
-    public function it_throws_exception_when_from_array_missing_settings(): void
+    public function it_throws_exception_when_from_array_missing_props(): void
     {
         $data = [
             'id' => 'comp-123',
@@ -135,11 +135,11 @@ final class ComponentDefinitionTest extends TestCase
     }
 
     #[Test]
-    public function it_allows_empty_settings(): void
+    public function it_allows_empty_props(): void
     {
         $component = new ComponentDefinition('comp-123', 'hero', 'default', []);
 
-        $this->assertSame([], $component->getSettings());
+        $this->assertSame([], $component->getProps());
     }
 
     #[Test]
@@ -156,7 +156,7 @@ final class ComponentDefinitionTest extends TestCase
             'id' => 'comp-789',
             'type' => 'navigation',
             'variant' => 'sticky',
-            'settings' => ['items' => ['Home', 'About']],
+            'props' => ['items' => ['Home', 'About']],
         ];
 
         $this->assertSame($expected, $component->toArray());
@@ -169,7 +169,7 @@ final class ComponentDefinitionTest extends TestCase
             'id' => 'comp-999',
             'type' => 'carousel',
             'variant' => 'autoplay',
-            'settings' => ['interval' => 3000, 'loop' => true],
+            'props' => ['interval' => 3000, 'loop' => true],
         ];
 
         $component = ComponentDefinition::fromArray($original);
@@ -179,9 +179,9 @@ final class ComponentDefinitionTest extends TestCase
     }
 
     #[Test]
-    public function it_handles_complex_nested_settings(): void
+    public function it_handles_complex_nested_props(): void
     {
-        $settings = [
+        $props = [
             'style' => [
                 'colors' => ['primary' => '#000', 'secondary' => '#fff'],
                 'spacing' => ['top' => 10, 'bottom' => 20],
@@ -194,9 +194,9 @@ final class ComponentDefinitionTest extends TestCase
             ],
         ];
 
-        $component = new ComponentDefinition('comp-complex', 'gallery', 'grid', $settings);
+        $component = new ComponentDefinition('comp-complex', 'gallery', 'grid', $props);
 
-        $this->assertSame($settings, $component->getSettings());
+        $this->assertSame($props, $component->getProps());
     }
 
     #[Test]
@@ -208,6 +208,6 @@ final class ComponentDefinitionTest extends TestCase
         $this->assertArrayHasKey('id', $array);
         $this->assertArrayHasKey('type', $array);
         $this->assertArrayHasKey('variant', $array);
-        $this->assertArrayHasKey('settings', $array);
+        $this->assertArrayHasKey('props', $array);
     }
 }

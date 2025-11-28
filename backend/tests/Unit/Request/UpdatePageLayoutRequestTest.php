@@ -33,7 +33,7 @@ final class UpdatePageLayoutRequestTest extends TestCase
                 'id' => '550e8400-e29b-41d4-a716-446655440000',
                 'type' => 'hero',
                 'variant' => 'with-image',
-                'settings' => ['heading' => 'Welcome'],
+                'props' => ['heading' => 'Welcome'],
             ],
         ];
 
@@ -68,7 +68,7 @@ final class UpdatePageLayoutRequestTest extends TestCase
                 'id' => '550e8400-e29b-41d4-a716-446655440000',
                 'type' => 'hero',
                 'variant' => 'with-image',
-                'settings' => ['heading' => 'Welcome'],
+                'props' => ['heading' => 'Welcome'],
             ],
         ];
 
@@ -124,7 +124,7 @@ final class UpdatePageLayoutRequestTest extends TestCase
             [
                 'type' => 'hero',
                 'variant' => 'with-image',
-                'settings' => [],
+                'props' => [],
             ],
         ];
 
@@ -144,7 +144,7 @@ final class UpdatePageLayoutRequestTest extends TestCase
             [
                 'id' => '550e8400-e29b-41d4-a716-446655440000',
                 'variant' => 'with-image',
-                'settings' => [],
+                'props' => [],
             ],
         ];
 
@@ -164,7 +164,7 @@ final class UpdatePageLayoutRequestTest extends TestCase
             [
                 'id' => '550e8400-e29b-41d4-a716-446655440000',
                 'type' => 'hero',
-                'settings' => [],
+                'props' => [],
             ],
         ];
 
@@ -177,9 +177,9 @@ final class UpdatePageLayoutRequestTest extends TestCase
     }
 
     #[Test]
-    public function it_fails_validation_when_component_missing_settings(): void
+    public function it_fails_validation_when_component_missing_props(): void
     {
-        // Arrange - component without 'settings' field
+        // Arrange - component without 'props' field
         $layout = [
             [
                 'id' => '550e8400-e29b-41d4-a716-446655440000',
@@ -205,7 +205,7 @@ final class UpdatePageLayoutRequestTest extends TestCase
                 'id' => 'not-a-valid-uuid',
                 'type' => 'hero',
                 'variant' => 'with-image',
-                'settings' => [],
+                'props' => [],
             ],
         ];
 
@@ -227,7 +227,7 @@ final class UpdatePageLayoutRequestTest extends TestCase
                 'id' => '',
                 'type' => 'hero',
                 'variant' => 'with-image',
-                'settings' => [],
+                'props' => [],
             ],
         ];
 
@@ -248,7 +248,7 @@ final class UpdatePageLayoutRequestTest extends TestCase
                 'id' => '550e8400-e29b-41d4-a716-446655440000',
                 'type' => 123,
                 'variant' => 'with-image',
-                'settings' => [],
+                'props' => [],
             ],
         ];
 
@@ -269,7 +269,7 @@ final class UpdatePageLayoutRequestTest extends TestCase
                 'id' => '550e8400-e29b-41d4-a716-446655440000',
                 'type' => 'hero',
                 'variant' => 456,
-                'settings' => [],
+                'props' => [],
             ],
         ];
 
@@ -282,15 +282,15 @@ final class UpdatePageLayoutRequestTest extends TestCase
     }
 
     #[Test]
-    public function it_fails_validation_when_settings_is_not_array(): void
+    public function it_fails_validation_when_props_is_not_array(): void
     {
-        // Arrange - settings is not an array
+        // Arrange - props is not an array
         $layout = [
             [
                 'id' => '550e8400-e29b-41d4-a716-446655440000',
                 'type' => 'hero',
                 'variant' => 'with-image',
-                'settings' => 'not-an-array',
+                'props' => 'not-an-array',
             ],
         ];
 
@@ -311,19 +311,19 @@ final class UpdatePageLayoutRequestTest extends TestCase
                 'id' => '550e8400-e29b-41d4-a716-446655440001',
                 'type' => 'hero',
                 'variant' => 'with-image',
-                'settings' => ['heading' => 'Welcome'],
+                'props' => ['heading' => 'Welcome'],
             ],
             [
                 'id' => '550e8400-e29b-41d4-a716-446655440002',
                 'type' => 'text-section',
                 'variant' => 'single-column',
-                'settings' => ['content' => 'About us'],
+                'props' => ['content' => 'About us'],
             ],
             [
                 'id' => '550e8400-e29b-41d4-a716-446655440003',
                 'type' => 'cta',
                 'variant' => 'centered',
-                'settings' => ['text' => 'Get Started'],
+                'props' => ['text' => 'Get Started'],
             ],
         ];
 
@@ -339,15 +339,15 @@ final class UpdatePageLayoutRequestTest extends TestCase
     }
 
     #[Test]
-    public function it_accepts_empty_settings_object(): void
+    public function it_accepts_empty_props_object(): void
     {
-        // Arrange - settings can be an empty array
+        // Arrange - props can be an empty array
         $layout = [
             [
                 'id' => '550e8400-e29b-41d4-a716-446655440000',
                 'type' => 'hero',
                 'variant' => 'with-image',
-                'settings' => [],
+                'props' => [],
             ],
         ];
 
@@ -360,15 +360,15 @@ final class UpdatePageLayoutRequestTest extends TestCase
     }
 
     #[Test]
-    public function it_accepts_complex_nested_settings(): void
+    public function it_accepts_complex_nested_props(): void
     {
-        // Arrange - settings with complex nested structure
+        // Arrange - props with complex nested structure
         $layout = [
             [
                 'id' => '550e8400-e29b-41d4-a716-446655440000',
                 'type' => 'hero',
                 'variant' => 'with-image',
-                'settings' => [
+                'props' => [
                     'heading' => 'Welcome',
                     'subheading' => 'To our store',
                     'cta' => [
@@ -397,7 +397,7 @@ final class UpdatePageLayoutRequestTest extends TestCase
                 'id' => '550e8400-e29b-41d4-a716-446655440000',
                 'type' => 'hero',
                 'variant' => 'with-image',
-                'settings' => [],
+                'props' => [],
                 'extraField' => 'unexpected',
             ],
         ];
@@ -419,7 +419,7 @@ final class UpdatePageLayoutRequestTest extends TestCase
                 'id' => '550e8400-e29b-41d4-a716-446655440000',
                 'type' => 'hero',
                 'variant' => 'with-image',
-                'settings' => [],
+                'props' => [],
             ],
         ];
 
@@ -440,7 +440,7 @@ final class UpdatePageLayoutRequestTest extends TestCase
                 'id' => '',  // Empty UUID passes Symfony NotBlank but will fail domain validation
                 'type' => '',
                 'variant' => '',
-                'settings' => [],
+                'props' => [],
             ],
         ];
 

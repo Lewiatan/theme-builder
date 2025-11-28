@@ -60,8 +60,8 @@ final class LayoutTest extends TestCase
     public function it_creates_from_array(): void
     {
         $data = [
-            ['id' => 'comp-1', 'type' => 'hero', 'variant' => 'default', 'settings' => []],
-            ['id' => 'comp-2', 'type' => 'footer', 'variant' => 'minimal', 'settings' => []],
+            ['id' => 'comp-1', 'type' => 'hero', 'variant' => 'default', 'props' => []],
+            ['id' => 'comp-2', 'type' => 'footer', 'variant' => 'minimal', 'props' => []],
         ];
 
         $layout = Layout::fromArray($data);
@@ -81,8 +81,8 @@ final class LayoutTest extends TestCase
         $layout = new Layout([$component1, $component2]);
 
         $expected = [
-            ['id' => 'comp-1', 'type' => 'hero', 'variant' => 'default', 'settings' => ['title' => 'Hello']],
-            ['id' => 'comp-2', 'type' => 'footer', 'variant' => 'minimal', 'settings' => []],
+            ['id' => 'comp-1', 'type' => 'hero', 'variant' => 'default', 'props' => ['title' => 'Hello']],
+            ['id' => 'comp-2', 'type' => 'footer', 'variant' => 'minimal', 'props' => []],
         ];
 
         $this->assertSame($expected, $layout->toArray());
@@ -92,8 +92,8 @@ final class LayoutTest extends TestCase
     public function from_array_and_to_array_are_reversible(): void
     {
         $original = [
-            ['id' => 'comp-1', 'type' => 'hero', 'variant' => 'default', 'settings' => []],
-            ['id' => 'comp-2', 'type' => 'footer', 'variant' => 'minimal', 'settings' => []],
+            ['id' => 'comp-1', 'type' => 'hero', 'variant' => 'default', 'props' => []],
+            ['id' => 'comp-2', 'type' => 'footer', 'variant' => 'minimal', 'props' => []],
         ];
 
         $layout = Layout::fromArray($original);

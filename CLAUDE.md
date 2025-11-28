@@ -72,6 +72,7 @@ Copy `.env.example` to `.env` and configure:
 - pgAdmin credentials
 - Backend settings (APP_ENV, APP_SECRET, DATABASE_URL)
 - Frontend API URL (VITE_API_URL)
+- Demo Shop URL (VITE_DEMO_SHOP_URL) - URL where the demo shop is accessible
 
 ### Docker Compose Services
 

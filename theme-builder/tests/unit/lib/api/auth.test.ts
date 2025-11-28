@@ -137,7 +137,7 @@ describe('Auth API', () => {
     });
 
     it('sets correct request headers', async () => {
-      let capturedHeaders: Headers | null = null;
+      let capturedHeaders: Headers | undefined;
 
       // Override handler to capture headers
       server.use(

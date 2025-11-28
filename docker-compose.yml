@@ -87,6 +87,7 @@ services:
     environment:
       NODE_ENV: development
       VITE_API_URL: ${VITE_API_URL}
+      VITE_DEMO_SHOP_URL: ${VITE_DEMO_SHOP_URL}
     volumes:
       - ./theme-builder:/app
       - ./shared:/shared

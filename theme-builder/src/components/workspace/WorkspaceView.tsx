@@ -125,7 +125,8 @@ export function WorkspaceView() {
   const handleDemo = useCallback(() => {
     const shopId = getShopIdFromToken();
     if (shopId) {
-      window.open(`http://localhost:5174/shop/${shopId}`, '_blank');
+      const demoShopUrl = import.meta.env.VITE_DEMO_SHOP_URL || 'http://localhost:5174';
+      window.open(`${demoShopUrl}/shop/${shopId}`, '_blank');
     } else {
       toast.error('Unable to open demo: Shop ID not found');
     }

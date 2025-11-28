@@ -31,8 +31,8 @@ export type CategoriesResponse = z.infer<typeof CategoriesResponseSchema>;
  *
  * This function handles both server-side (SSR loader) and client-side fetching.
  * The API URL is automatically determined based on execution context:
- * - Server-side: Uses Docker service networking (nginx:80)
- * - Client-side: Uses environment variable (localhost:8000)
+ * - Server-side: Uses VITE_API_URL environment variable (Vercel/production) or Docker service networking (local dev)
+ * - Client-side: Uses VITE_API_URL environment variable
  *
  * @returns Promise resolving to array of categories
  * @throws Error if fetch fails or response validation fails

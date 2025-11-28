@@ -8,4 +8,7 @@ export default defineConfig({
   server: {
     port: 5174,
   },
+  resolve: {
+    dedupe: ["react", "react-dom", "react-router-dom", "zod"],
+  },
 });

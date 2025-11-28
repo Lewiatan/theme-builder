@@ -1,16 +1,18 @@
 import { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
+import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
 import { Alert, AlertDescription } from '@/components/ui/alert';
-import { login, AuthenticationError } from '@/lib/api/auth';
+import { register, AuthenticationError } from '@/lib/api/auth';
 import type { ValidationErrors } from '@/types/auth';
 
-export function LoginForm() {
+export function RegistrationForm() {
   // Form state
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [shopName, setShopName] = useState('');
   const [validationErrors, setValidationErrors] = useState<ValidationErrors>({});
   const [apiError, setApiError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
@@ -42,6 +44,18 @@ export function LoginForm() {
   };
 
   /**
+   * Handles shop name input change
+   * Clears shop name validation error when user starts typing
+   */
+  const handleShopNameChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setShopName(e.target.value);
+    // Clear shop name error when user starts typing
+    if (validationErrors.shopName) {
+      setValidationErrors((prev) => ({ ...prev, shopName: undefined }));
+    }
+  };
+
+  /**
    * Validates form fields before submission
    * Returns validation errors object or null if valid
    */
@@ -60,12 +74,23 @@ export function LoginForm() {
       errors.password = 'Password is required';
     }
 
+    // Shop name validation
+    if (!shopName.trim()) {
+      errors.shopName = 'Shop name is required';
+    } else if (shopName.trim().length < 3) {
+      errors.shopName = 'Shop name must be at least 3 characters';
+    } else if (shopName.trim().length > 50) {
+      errors.shopName = 'Shop name must be at most 50 characters';
+    } else if (!/^[a-zA-Z0-9\s\-_]+$/.test(shopName)) {
+      errors.shopName = 'Shop name can only contain letters, numbers, spaces, hyphens, and underscores';
+    }
+
     return Object.keys(errors).length > 0 ? errors : null;
   };
 
   /**
    * Handles form submission
-   * Validates inputs, calls login API, handles success/error responses
+   * Validates inputs, calls register API, handles success/error responses
    */
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -85,17 +110,16 @@ export function LoginForm() {
     setIsLoading(true);
 
     try {
-      // Call login API
-      const response = await login({ email, password });
+      // Call register API
+      await register({
+        email,
+        password,
+        shopName,
+      });
 
-      // Store token in localStorage
-      localStorage.setItem('jwt_token', response.token);
-
-      // Dispatch custom event to notify App component of auth change
-      window.dispatchEvent(new Event('auth-change'));
-
-      // Navigate to workspace
-      navigate('/', { replace: true });
+      // Show success toast and redirect immediately
+      toast.success('Account created successfully! Redirecting to login...');
+      navigate('/login');
     } catch (error) {
       // Handle authentication errors
       if (error instanceof AuthenticationError) {
@@ -109,8 +133,8 @@ export function LoginForm() {
         // Handle unexpected errors
         setApiError('Unable to connect. Please check your internet connection.');
       }
-    } finally {
-      // Always clear loading state
+
+      // Clear loading state on error
       setIsLoading(false);
     }
   };
@@ -118,11 +142,11 @@ export function LoginForm() {
   return (
     <div className="flex min-h-screen items-center justify-center bg-gray-100">
       <div className="w-full max-w-md rounded-lg bg-white p-8 shadow-lg">
-        <h1 className="mb-6 text-center text-2xl font-bold text-gray-900" data-testid="login-header">
-          Theme Builder Login
+        <h1 className="mb-6 text-center text-2xl font-bold text-gray-900" data-testid="register-header">
+          Create Your Account
         </h1>
 
-        <form onSubmit={handleSubmit} className="space-y-4" noValidate data-testid="login-form">
+        <form onSubmit={handleSubmit} className="space-y-4" noValidate data-testid="register-form">
           {/* API Error Alert */}
           {apiError && (
             <Alert variant="destructive" data-testid="api-error">
@@ -166,16 +190,39 @@ export function LoginForm() {
             )}
           </div>
 
+          {/* Shop Name Field */}
+          <div className="space-y-2">
+            <Label htmlFor="shopName">Shop Name</Label>
+            <Input
+              id="shopName"
+              type="text"
+              value={shopName}
+              onChange={handleShopNameChange}
+              placeholder="Enter your shop name"
+              className={validationErrors.shopName ? 'border-red-500' : ''}
+              disabled={isLoading}
+              data-testid="shop-name-input"
+            />
+            {validationErrors.shopName && (
+              <p className="text-sm text-red-600" data-testid="shop-name-error">{validationErrors.shopName}</p>
+            )}
+          </div>
+
           {/* Submit Button */}
-          <Button type="submit" className="w-full" disabled={isLoading} data-testid="submit-button">
-            {isLoading ? 'Logging in...' : 'Login'}
+          <Button
+            type="submit"
+            className="w-full"
+            disabled={isLoading}
+            data-testid="submit-button"
+          >
+            {isLoading ? 'Creating Account...' : 'Create Account'}
           </Button>
 
-          {/* Registration Link */}
+          {/* Login Link */}
           <div className="text-center text-sm text-gray-600">
-            Don't have an account?{' '}
-            <Link to="/register" className="font-medium text-blue-600 hover:text-blue-500" data-testid="register-link">
-              Register
+            Already have an account?{' '}
+            <Link to="/login" className="font-medium text-blue-600 hover:text-blue-500" data-testid="login-link">
+              Log in
             </Link>
           </div>
         </form>

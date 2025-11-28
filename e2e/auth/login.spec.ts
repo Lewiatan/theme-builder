@@ -17,11 +17,11 @@ test.describe("Login Flow", () => {
       await page.goto("/login");
 
       // Fill login form with credentials from ExampleShopSeeder
-      await page.fill('input[type="email"]', "demo@example.com");
-      await page.fill('input[type="password"]', "test123");
+      await page.getByTestId("email-input").fill("demo@example.com");
+      await page.getByTestId("password-input").fill("test123");
 
       // Submit form
-      await page.click('button[type="submit"]');
+      await page.getByTestId("submit-button").click();
 
       // Wait for navigation to workspace
       await expect(page).toHaveURL("/");
@@ -40,11 +40,11 @@ test.describe("Login Flow", () => {
     test("shows loading state during login", async ({ page }) => {
       await page.goto("/login");
 
-      await page.fill('input[type="email"]', "demo@example.com");
-      await page.fill('input[type="password"]', "test123");
+      await page.getByTestId("email-input").fill("demo@example.com");
+      await page.getByTestId("password-input").fill("test123");
 
       // Click submit
-      const submitButton = page.locator('button[type="submit"]');
+      const submitButton = page.getByTestId("submit-button");
       await submitButton.click();
 
       // Check for loading state
@@ -61,11 +61,13 @@ test.describe("Login Flow", () => {
       await page.goto("/login");
 
       // Submit without filling fields
-      await page.click('button[type="submit"]');
+      await page.getByTestId("submit-button").click();
 
       // Verify validation errors
-      await expect(page.locator("text=/email is required/i")).toBeVisible();
-      await expect(page.locator("text=/password is required/i")).toBeVisible();
+      await expect(page.getByTestId("email-error")).toBeVisible();
+      await expect(page.getByTestId("email-error")).toContainText(/email is required/i);
+      await expect(page.getByTestId("password-error")).toBeVisible();
+      await expect(page.getByTestId("password-error")).toContainText(/password is required/i);
 
       // Verify no navigation occurred
       expect(page.url()).toContain("/login");
@@ -76,15 +78,14 @@ test.describe("Login Flow", () => {
     }) => {
       await page.goto("/login");
 
-      await page.fill('input[type="email"]', "invalid-email");
-      await page.fill('input[type="password"]', "password123");
+      await page.getByTestId("email-input").fill("invalid-email");
+      await page.getByTestId("password-input").fill("password123");
 
-      await page.click('button[type="submit"]');
+      await page.getByTestId("submit-button").click();
 
       // Verify email format error
-      await expect(
-        page.locator("text=/please enter a valid email address/i"),
-      ).toBeVisible();
+      await expect(page.getByTestId("email-error")).toBeVisible();
+      await expect(page.getByTestId("email-error")).toContainText(/please enter a valid email address/i);
     });
 
     test("clears validation error when user starts typing", async ({
@@ -93,15 +94,15 @@ test.describe("Login Flow", () => {
       await page.goto("/login");
 
       // Submit to trigger validation
-      await page.click('button[type="submit"]');
+      await page.getByTestId("submit-button").click();
 
-      await expect(page.locator("text=/email is required/i")).toBeVisible();
+      await expect(page.getByTestId("email-error")).toBeVisible();
 
       // Start typing in email field
-      await page.fill('input[type="email"]', "t");
+      await page.getByTestId("email-input").fill("t");
 
       // Error should be cleared
-      await expect(page.locator("text=/email is required/i")).not.toBeVisible();
+      await expect(page.getByTestId("email-error")).not.toBeVisible();
     });
   });
 
@@ -109,15 +110,14 @@ test.describe("Login Flow", () => {
     test("shows error for invalid credentials", async ({ page }) => {
       await page.goto("/login");
 
-      await page.fill('input[type="email"]', "nonexistent@example.com");
-      await page.fill('input[type="password"]', "wrongpassword");
+      await page.getByTestId("email-input").fill("nonexistent@example.com");
+      await page.getByTestId("password-input").fill("wrongpassword");
 
-      await page.click('button[type="submit"]');
+      await page.getByTestId("submit-button").click();
 
       // Wait for error message
-      await expect(
-        page.locator("text=/invalid email or password/i"),
-      ).toBeVisible();
+      await expect(page.getByTestId("api-error")).toBeVisible();
+      await expect(page.getByTestId("api-error")).toContainText(/invalid email or password/i);
 
       // Verify still on login page
       expect(page.url()).toContain("/login");
@@ -136,9 +136,9 @@ test.describe("Login Flow", () => {
     }) => {
       // First, perform a successful login
       await page.goto("/login");
-      await page.fill('input[type="email"]', "demo@example.com");
-      await page.fill('input[type="password"]', "test123");
-      await page.click('button[type="submit"]');
+      await page.getByTestId("email-input").fill("demo@example.com");
+      await page.getByTestId("password-input").fill("test123");
+      await page.getByTestId("submit-button").click();
 
       // Wait for navigation
       await expect(page).toHaveURL("/");
@@ -156,19 +156,17 @@ test.describe("Login Flow", () => {
       await page.goto("/login");
 
       // Submit with invalid credentials
-      await page.fill('input[type="email"]', "wrong@example.com");
-      await page.fill('input[type="password"]', "wrongpassword");
-      await page.click('button[type="submit"]');
+      await page.getByTestId("email-input").fill("wrong@example.com");
+      await page.getByTestId("password-input").fill("wrongpassword");
+      await page.getByTestId("submit-button").click();
 
       // Wait for error
-      await expect(
-        page.locator("text=/invalid email or password/i"),
-      ).toBeVisible();
+      await expect(page.getByTestId("api-error")).toBeVisible();
 
       // Clear and enter correct credentials
-      await page.fill('input[type="email"]', "demo@example.com");
-      await page.fill('input[type="password"]', "test123");
-      await page.click('button[type="submit"]');
+      await page.getByTestId("email-input").fill("demo@example.com");
+      await page.getByTestId("password-input").fill("test123");
+      await page.getByTestId("submit-button").click();
 
       // Verify successful login
       await expect(page).toHaveURL("/");
@@ -178,22 +176,18 @@ test.describe("Login Flow", () => {
       await page.goto("/login");
 
       // Trigger error
-      await page.fill('input[type="email"]', "wrong@example.com");
-      await page.fill('input[type="password"]', "wrongpassword");
-      await page.click('button[type="submit"]');
+      await page.getByTestId("email-input").fill("wrong@example.com");
+      await page.getByTestId("password-input").fill("wrongpassword");
+      await page.getByTestId("submit-button").click();
 
-      await expect(
-        page.locator("text=/invalid email or password/i"),
-      ).toBeVisible();
+      await expect(page.getByTestId("api-error")).toBeVisible();
 
       // Start new attempt
-      await page.fill('input[type="email"]', "demo@example.com");
-      await page.click('button[type="submit"]');
+      await page.getByTestId("email-input").fill("demo@example.com");
+      await page.getByTestId("submit-button").click();
 
       // Error should be cleared during submission
-      await expect(
-        page.locator("text=/invalid email or password/i"),
-      ).not.toBeVisible();
+      await expect(page.getByTestId("api-error")).not.toBeVisible();
     });
   });
 
@@ -205,13 +199,13 @@ test.describe("Login Flow", () => {
       await page.goto("/login");
 
       // Verify form is visible and properly sized
-      const form = page.locator("form");
+      const form = page.getByTestId("login-form");
       await expect(form).toBeVisible();
 
       // Complete login flow on mobile
-      await page.fill('input[type="email"]', "demo@example.com");
-      await page.fill('input[type="password"]', "test123");
-      await page.click('button[type="submit"]');
+      await page.getByTestId("email-input").fill("demo@example.com");
+      await page.getByTestId("password-input").fill("test123");
+      await page.getByTestId("submit-button").click();
 
       // Verify successful login
       await expect(page).toHaveURL("/");
@@ -237,11 +231,11 @@ test.describe("Login Flow", () => {
     test("form can be submitted with Enter key", async ({ page }) => {
       await page.goto("/login");
 
-      await page.fill('input[type="email"]', "demo@example.com");
-      await page.fill('input[type="password"]', "test123");
+      await page.getByTestId("email-input").fill("demo@example.com");
+      await page.getByTestId("password-input").fill("test123");
 
       // Press Enter in password field
-      await page.locator('input[type="password"]').press("Enter");
+      await page.getByTestId("password-input").press("Enter");
 
       // Should trigger form submission
       await expect(page).toHaveURL("/");

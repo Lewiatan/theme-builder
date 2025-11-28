@@ -4,6 +4,73 @@ const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000';
 
 export const handlers = [
   // Auth handlers - matches backend AuthController responses
+  http.post(`${API_URL}/api/auth/register`, async ({ request }) => {
+    const body = await request.json() as { email: string; password: string; shopName: string };
+
+    // Mock successful registration - matches backend 201 response
+    if (body.email === 'newuser@example.com' && body.shopName === 'New Shop') {
+      return HttpResponse.json(
+        {
+          userId: '550e8400-e29b-41d4-a716-446655440000',
+        },
+        { status: 201 }
+      );
+    }
+
+    // Mock email already exists - matches backend 409 response
+    if (body.email === 'existing@example.com') {
+      return HttpResponse.json(
+        {
+          error: 'email_exists',
+          message: 'An account with this email already exists',
+        },
+        { status: 409 }
+      );
+    }
+
+    // Mock shop name already exists - matches backend 409 response
+    if (body.shopName === 'Existing Shop') {
+      return HttpResponse.json(
+        {
+          error: 'shop_exists',
+          message: 'A shop with this name already exists',
+        },
+        { status: 409 }
+      );
+    }
+
+    // Mock validation error - matches backend 400 response
+    if (body.email === 'invalid-email') {
+      return HttpResponse.json(
+        {
+          error: 'validation_error',
+          message: 'Invalid email format',
+          field: 'email',
+        },
+        { status: 400 }
+      );
+    }
+
+    // Mock server error - matches backend 500 response
+    if (body.email === 'server-error@example.com') {
+      return HttpResponse.json(
+        {
+          error: 'registration_failed',
+          message: 'Registration failed. Please try again.',
+        },
+        { status: 500 }
+      );
+    }
+
+    // Default to successful registration
+    return HttpResponse.json(
+      {
+        userId: '660e8400-e29b-41d4-a716-446655440001',
+      },
+      { status: 201 }
+    );
+  }),
+
   http.post(`${API_URL}/api/auth/login`, async ({ request }) => {
     const body = await request.json() as { email: string; password: string };
 

@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { login, AuthenticationError } from '@/lib/api/auth';
+import { login, register, AuthenticationError } from '@/lib/api/auth';
 import { server } from '@/test/mocks/server';
 import { http, HttpResponse } from 'msw';
 
@@ -153,6 +153,185 @@ describe('Auth API', () => {
       };
 
       await login(credentials);
+
+      expect(capturedHeaders?.get('Content-Type')).toBe('application/json');
+    });
+  });
+
+  describe('register()', () => {
+    it('returns userId on successful registration', async () => {
+      const credentials = {
+        email: 'newuser@example.com',
+        password: 'password123',
+        shopName: 'New Shop',
+      };
+
+      const response = await register(credentials);
+
+      expect(response).toEqual({
+        userId: '550e8400-e29b-41d4-a716-446655440000',
+      });
+    });
+
+    it('throws AuthenticationError for email already exists (409)', async () => {
+      const credentials = {
+        email: 'existing@example.com',
+        password: 'password123',
+        shopName: 'New Shop',
+      };
+
+      await expect(register(credentials)).rejects.toThrow(AuthenticationError);
+
+      try {
+        await register(credentials);
+      } catch (error) {
+        expect(error).toBeInstanceOf(AuthenticationError);
+        expect((error as AuthenticationError).message).toBe('An account with this email already exists');
+        expect((error as AuthenticationError).code).toBe('email_exists');
+      }
+    });
+
+    it('throws AuthenticationError for shop name already exists (409)', async () => {
+      const credentials = {
+        email: 'newuser@example.com',
+        password: 'password123',
+        shopName: 'Existing Shop',
+      };
+
+      await expect(register(credentials)).rejects.toThrow(AuthenticationError);
+
+      try {
+        await register(credentials);
+      } catch (error) {
+        expect(error).toBeInstanceOf(AuthenticationError);
+        expect((error as AuthenticationError).message).toBe('A shop with this name already exists');
+        expect((error as AuthenticationError).code).toBe('shop_exists');
+      }
+    });
+
+    it('throws AuthenticationError for validation error (400)', async () => {
+      const credentials = {
+        email: 'invalid-email',
+        password: 'password123',
+        shopName: 'New Shop',
+      };
+
+      await expect(register(credentials)).rejects.toThrow(AuthenticationError);
+
+      try {
+        await register(credentials);
+      } catch (error) {
+        expect(error).toBeInstanceOf(AuthenticationError);
+        expect((error as AuthenticationError).message).toBe('Invalid email format');
+        expect((error as AuthenticationError).code).toBe('validation_error');
+        expect((error as AuthenticationError).field).toBe('email');
+      }
+    });
+
+    it('throws AuthenticationError for server error (500)', async () => {
+      const credentials = {
+        email: 'server-error@example.com',
+        password: 'password123',
+        shopName: 'New Shop',
+      };
+
+      await expect(register(credentials)).rejects.toThrow(AuthenticationError);
+
+      try {
+        await register(credentials);
+      } catch (error) {
+        expect(error).toBeInstanceOf(AuthenticationError);
+        expect((error as AuthenticationError).message).toBe('Registration failed. Please try again.');
+        expect((error as AuthenticationError).code).toBe('registration_failed');
+      }
+    });
+
+    it('throws network error for non-JSON response', async () => {
+      // Override handler to return non-JSON response
+      server.use(
+        http.post('http://localhost:8000/api/auth/register', () => {
+          return new HttpResponse('Internal Server Error', { status: 500 });
+        })
+      );
+
+      const credentials = {
+        email: 'newuser@example.com',
+        password: 'password123',
+        shopName: 'New Shop',
+      };
+
+      await expect(register(credentials)).rejects.toThrow(AuthenticationError);
+
+      try {
+        await register(credentials);
+      } catch (error) {
+        expect(error).toBeInstanceOf(AuthenticationError);
+        expect((error as AuthenticationError).message).toBe('Network error. Please try again.');
+        expect((error as AuthenticationError).code).toBe('network_error');
+      }
+    });
+
+    it('includes field information in error when provided', async () => {
+      const credentials = {
+        email: 'invalid-email',
+        password: 'password123',
+        shopName: 'New Shop',
+      };
+
+      try {
+        await register(credentials);
+        // Should not reach here
+        expect(true).toBe(false);
+      } catch (error) {
+        expect(error).toBeInstanceOf(AuthenticationError);
+        expect((error as AuthenticationError).field).toBe('email');
+      }
+    });
+
+    it('sends correct request payload with camelCase shopName', async () => {
+      let capturedRequest: any = null;
+
+      // Override handler to capture request
+      server.use(
+        http.post('http://localhost:8000/api/auth/register', async ({ request }) => {
+          capturedRequest = await request.json();
+          return HttpResponse.json({ userId: 'test-uuid' }, { status: 201 });
+        })
+      );
+
+      const credentials = {
+        email: 'test@example.com',
+        password: 'testpass',
+        shopName: 'Test Shop',
+      };
+
+      await register(credentials);
+
+      expect(capturedRequest).toEqual({
+        email: 'test@example.com',
+        password: 'testpass',
+        shopName: 'Test Shop', // Verify camelCase, not snake_case
+      });
+    });
+
+    it('sets correct request headers', async () => {
+      let capturedHeaders: Headers | null = null;
+
+      // Override handler to capture headers
+      server.use(
+        http.post('http://localhost:8000/api/auth/register', ({ request }) => {
+          capturedHeaders = request.headers;
+          return HttpResponse.json({ userId: 'test-uuid' }, { status: 201 });
+        })
+      );
+
+      const credentials = {
+        email: 'test@example.com',
+        password: 'testpass',
+        shopName: 'Test Shop',
+      };
+
+      await register(credentials);
 
       expect(capturedHeaders?.get('Content-Type')).toBe('application/json');
     });

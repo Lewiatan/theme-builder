@@ -1,5 +1,5 @@
 /**
- * Authentication-related types for the Login View
+ * Authentication-related types for Login and Registration Views
  */
 
 /**
@@ -44,6 +44,7 @@ export interface LoginError {
 export interface ValidationErrors {
   email?: string;
   password?: string;
+  shopName?: string;
 }
 
 /**
@@ -53,4 +54,43 @@ export interface UserInfo {
   id: string;
   email: string;
   shopId?: string;
+}
+
+/**
+ * Local form state for registration form inputs
+ */
+export interface RegistrationFormData {
+  email: string;
+  password: string;
+  shopName: string;
+}
+
+/**
+ * Request DTO for POST /api/auth/register
+ * Note: uses camelCase to match backend RegisterRequest DTO
+ */
+export interface RegisterRequest {
+  email: string;
+  password: string;
+  shopName: string;
+}
+
+/**
+ * Response DTO for successful registration
+ * Contains only userId based on actual AuthController implementation
+ */
+export interface RegisterResponse {
+  userId: string;
+}
+
+/**
+ * Error response DTO from registration endpoint
+ * Matches backend error format from AuthController
+ */
+export interface RegisterError {
+  error: 'email_exists' | 'shop_exists' | 'validation_error' | 'registration_failed';
+  message: string;
+  field?: string; // Optional, for field-specific validation errors
+  exception?: string; // Optional, in development mode only
+  file?: string; // Optional, in development mode only
 }

@@ -4,6 +4,7 @@ import { Toaster } from 'sonner'
 import { WorkspaceProvider } from './contexts/WorkspaceContext'
 import { WorkspaceView } from './components/workspace/WorkspaceView'
 import { LoginForm } from './components/auth/LoginForm'
+import { RegistrationForm } from './components/auth/RegistrationForm'
 import './App.css'
 
 function App() {
@@ -51,6 +52,16 @@ function App() {
               <Navigate to="/" replace />
             ) : (
               <LoginForm />
+            )
+          }
+        />
+        <Route
+          path="/register"
+          element={
+            isAuthenticated ? (
+              <Navigate to="/" replace />
+            ) : (
+              <RegistrationForm />
             )
           }
         />

@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace App\Service;
 
+use Symfony\Component\Uid\Uuid;
+
 /**
  * Provides default component definitions for page layouts.
  *
@@ -13,12 +15,12 @@ namespace App\Service;
 final class DefaultLayoutDefinitions
 {
     /**
-     * Get header component definition with a unique ID suffix.
+     * Get header component definition with a unique UUID.
      */
     public static function getHeaderComponent(string $idSuffix): array
     {
         return [
-            'id' => 'default-header-' . $idSuffix,
+            'id' => Uuid::v7()->toString(),
             'type' => 'HeaderNavigation',
             'variant' => 'static',
             'props' => [
@@ -37,7 +39,7 @@ final class DefaultLayoutDefinitions
         return [
             self::getHeaderComponent('home'),
             [
-                'id' => 'default-heading1-home',
+                'id' => Uuid::v7()->toString(), // was: 'default-heading1-home',
                 'type' => 'Heading',
                 'variant' => 'background-image',
                 'props' => [
@@ -50,7 +52,7 @@ final class DefaultLayoutDefinitions
                 ],
             ],
             [
-                'id' => 'default-textsection1-home',
+                'id' => Uuid::v7()->toString(), // was: 'default-textsection1-home',
                 'type' => 'TextSection',
                 'variant' => 'text-only',
                 'props' => [
@@ -64,7 +66,7 @@ final class DefaultLayoutDefinitions
                 ],
             ],
             [
-                'id' => 'default-heading2-home',
+                'id' => Uuid::v7()->toString(), // was: 'default-heading2-home',
                 'type' => 'Heading',
                 'variant' => 'text-only',
                 'props' => [
@@ -74,7 +76,7 @@ final class DefaultLayoutDefinitions
                 ],
             ],
             [
-                'id' => 'default-textsection2-home',
+                'id' => Uuid::v7()->toString(), // was: 'default-textsection2-home',
                 'type' => 'TextSection',
                 'variant' => 'with-icons',
                 'props' => [
@@ -107,7 +109,7 @@ final class DefaultLayoutDefinitions
         return [
             self::getHeaderComponent('catalog'),
             [
-                'id' => 'default-heading1-catalog',
+                'id' => Uuid::v7()->toString(), // was: 'default-heading1-catalog',
                 'type' => 'Heading',
                 'variant' => 'background-color',
                 'props' => [
@@ -120,7 +122,7 @@ final class DefaultLayoutDefinitions
                 ],
             ],
             [
-                'id' => 'default-categorypills-catalog',
+                'id' => Uuid::v7()->toString(), // was: 'default-categorypills-catalog',
                 'type' => 'CategoryPills',
                 'variant' => 'center',
                 'props' => [
@@ -129,7 +131,7 @@ final class DefaultLayoutDefinitions
                 ],
             ],
             [
-                'id' => 'default-productlistgrid-catalog',
+                'id' => Uuid::v7()->toString(), // was: 'default-productlistgrid-catalog',
                 'type' => 'ProductListGrid',
                 'variant' => '3',
                 'props' => [
@@ -137,7 +139,7 @@ final class DefaultLayoutDefinitions
                 ],
             ],
             [
-                'id' => 'default-textsection1-catalog',
+                'id' => Uuid::v7()->toString(), // was: 'default-textsection1-catalog',
                 'type' => 'TextSection',
                 'variant' => 'text-only',
                 'props' => [
@@ -151,7 +153,7 @@ final class DefaultLayoutDefinitions
                 ],
             ],
             [
-                'id' => 'default-heading2-catalog',
+                'id' => Uuid::v7()->toString(), // was: 'default-heading2-catalog',
                 'type' => 'Heading',
                 'variant' => 'background-color',
                 'props' => [
@@ -164,7 +166,7 @@ final class DefaultLayoutDefinitions
                 ],
             ],
             [
-                'id' => 'default-textsection2-catalog',
+                'id' => Uuid::v7()->toString(), // was: 'default-textsection2-catalog',
                 'type' => 'TextSection',
                 'variant' => 'with-images',
                 'props' => [
@@ -193,7 +195,7 @@ final class DefaultLayoutDefinitions
         return [
             self::getHeaderComponent('product'),
             [
-                'id' => 'default-heading1-product',
+                'id' => Uuid::v7()->toString(), // was: 'default-heading1-product',
                 'type' => 'Heading',
                 'variant' => 'text-only',
                 'props' => [
@@ -203,7 +205,7 @@ final class DefaultLayoutDefinitions
                 ],
             ],
             [
-                'id' => 'default-textsection1-product',
+                'id' => Uuid::v7()->toString(), // was: 'default-textsection1-product',
                 'type' => 'TextSection',
                 'variant' => 'text-only',
                 'props' => [
@@ -217,7 +219,7 @@ final class DefaultLayoutDefinitions
                 ],
             ],
             [
-                'id' => 'default-heading2-product',
+                'id' => Uuid::v7()->toString(), // was: 'default-heading2-product',
                 'type' => 'Heading',
                 'variant' => 'background-image',
                 'props' => [
@@ -230,7 +232,7 @@ final class DefaultLayoutDefinitions
                 ],
             ],
             [
-                'id' => 'default-textsection2-product',
+                'id' => Uuid::v7()->toString(), // was: 'default-textsection2-product',
                 'type' => 'TextSection',
                 'variant' => 'text-only',
                 'props' => [
@@ -263,7 +265,7 @@ final class DefaultLayoutDefinitions
         return [
             self::getHeaderComponent('contact'),
             [
-                'id' => 'default-heading1-contact',
+                'id' => Uuid::v7()->toString(), // was: 'default-heading1-contact',
                 'type' => 'Heading',
                 'variant' => 'background-image',
                 'props' => [
@@ -276,7 +278,7 @@ final class DefaultLayoutDefinitions
                 ],
             ],
             [
-                'id' => 'default-textsection1-contact',
+                'id' => Uuid::v7()->toString(), // was: 'default-textsection1-contact',
                 'type' => 'TextSection',
                 'variant' => 'text-only',
                 'props' => [
@@ -290,7 +292,7 @@ final class DefaultLayoutDefinitions
                 ],
             ],
             [
-                'id' => 'default-heading2-contact',
+                'id' => Uuid::v7()->toString(), // was: 'default-heading2-contact',
                 'type' => 'Heading',
                 'variant' => 'background-color',
                 'props' => [
@@ -303,7 +305,7 @@ final class DefaultLayoutDefinitions
                 ],
             ],
             [
-                'id' => 'default-textsection2-contact',
+                'id' => Uuid::v7()->toString(), // was: 'default-textsection2-contact',
                 'type' => 'TextSection',
                 'variant' => 'with-icons',
                 'props' => [

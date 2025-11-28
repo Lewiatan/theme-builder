@@ -31,6 +31,14 @@ async function globalSetup() {
       { stdio: 'inherit' }
     );
 
+    // Also seed development database for E2E tests
+    // E2E tests run against the API which uses the dev database
+    console.log('🌱 Seeding development database for E2E tests...');
+    execSync(
+      'docker compose exec -T backend vendor/bin/phinx seed:run -e development',
+      { stdio: 'inherit' }
+    );
+
     console.log('✅ Global test setup complete!');
   } catch (error) {
     console.error('❌ Failed to setup test database:', error);

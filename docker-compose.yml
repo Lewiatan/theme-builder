@@ -104,6 +104,9 @@ services:
     command: sh -c "npm install && npm run dev -- --host 0.0.0.0"
     environment:
       NODE_ENV: development
+      # SERVER_API_URL: Used by SSR loader (server-side fetch) to reach backend via Docker network
+      SERVER_API_URL: http://nginx:80
+      # VITE_API_URL: Used by client-side JavaScript in browser (localhost from host machine)
       VITE_API_URL: ${VITE_API_URL}
     volumes:
       - ./demo-shop:/app

@@ -26,13 +26,12 @@ test.describe('Demo Shop Navigation', () => {
     // Wait for login form to be visible
     await expect(page.getByTestId('login-header')).toBeVisible();
 
-    // Fill in JWT token in the textarea
-    const tokenTextarea = page.getByTestId('token-input');
-    await tokenTextarea.fill(testJWT);
+    // Fill in email and password (seeded user from ExampleShopSeeder)
+    await page.getByTestId('email-input').fill('demo@example.com');
+    await page.getByTestId('password-input').fill('test123');
 
     // Submit the login form
-    const loginButton = page.getByTestId('login-button');
-    await loginButton.click();
+    await page.getByTestId('submit-button').click();
 
     // Wait for navigation to workspace
     await page.waitForURL('/');

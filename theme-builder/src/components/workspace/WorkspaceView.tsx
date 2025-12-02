@@ -319,7 +319,7 @@ export function WorkspaceView() {
                 componentRegistry={componentRegistry}
                 onComponentDelete={deleteComponent}
                 onRestoreDefault={resetLayout}
-                isDragging={dragState.isDragging}
+                dragState={dragState}
               />
             </div>
           </main>

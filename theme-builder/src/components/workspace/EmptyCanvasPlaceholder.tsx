@@ -8,8 +8,9 @@ export interface EmptyCanvasPlaceholderProps {
 
 export const EmptyCanvasPlaceholder = memo(function EmptyCanvasPlaceholder({ onRestoreDefault }: EmptyCanvasPlaceholderProps) {
   const { setNodeRef, isOver } = useDroppable({
-    id: 'dropzone-0',
+    id: 'empty-canvas',
     data: {
+      type: 'canvas-placeholder',
       index: 0,
     },
   });

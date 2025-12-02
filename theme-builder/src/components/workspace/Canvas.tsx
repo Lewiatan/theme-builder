@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { SortableContext, verticalListSortingStrategy } from '@dnd-kit/sortable';
 import {
   AlertDialog,
@@ -13,15 +13,16 @@ import {
 import type { ComponentRegistry } from '../../types/workspace';
 import { CanvasComponent } from './CanvasComponent';
 import { EmptyCanvasPlaceholder } from './EmptyCanvasPlaceholder';
-import { DropZone } from './DropZone';
+import { InsertionIndicator } from './InsertionIndicator';
 import { ComponentDefinition } from '@/types/api';
+import type { DragState } from '../../hooks/useDragAndDrop';
 
 export interface CanvasProps {
   layout: ComponentDefinition[];
   componentRegistry: ComponentRegistry;
   onComponentDelete: (id: string) => void;
   onRestoreDefault?: () => void;
-  isDragging?: boolean;
+  dragState?: DragState;
 }
 
 export function Canvas({
@@ -29,7 +30,7 @@ export function Canvas({
   componentRegistry,
   onComponentDelete,
   onRestoreDefault,
-  isDragging = false,
+  dragState,
 }: CanvasProps) {
   const [deleteConfirmId, setDeleteConfirmId] = useState<string | null>(null);
 
@@ -58,21 +59,26 @@ export function Canvas({
 
   return (
     <SortableContext items={componentIds} strategy={verticalListSortingStrategy}>
-      <div className="space-y-2">
-        {/* Drop zone at the beginning */}
-        <DropZone index={0} isActive={isDragging} />
+      <div className="relative space-y-2">
+        {/* Insertion indicator - shows where component will be dropped */}
+        {dragState && (
+          <InsertionIndicator
+            insertionIndex={dragState.insertionIndex}
+            layout={layout}
+            isDragging={dragState.isDragging}
+            draggedComponentId={dragState.draggedId}
+          />
+        )}
 
-        {/* Render each component with drop zone after it */}
+        {/* Render canvas components */}
         {layout.map((componentDef, index) => (
-          <React.Fragment key={componentDef.id}>
-            <CanvasComponent
-              componentDefinition={componentDef}
-              componentRegistry={componentRegistry}
-              onDelete={handleDeleteClick}
-              index={index}
-            />
-            <DropZone index={index + 1} isActive={isDragging} />
-          </React.Fragment>
+          <CanvasComponent
+            key={componentDef.id}
+            componentDefinition={componentDef}
+            componentRegistry={componentRegistry}
+            onDelete={handleDeleteClick}
+            index={index}
+          />
         ))}
 
         {/* Delete confirmation dialog */}

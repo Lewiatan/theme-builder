@@ -1,14 +1,16 @@
 import { useState } from 'react';
 import type { DragEndEvent, DragStartEvent, DragMoveEvent } from '@dnd-kit/core';
 import { toast } from 'sonner';
+import { calculateInsertionPoint } from '../utils/insertionCalculator';
 
 export interface DragState {
   isDragging: boolean;
   draggedComponentType: string | null;
   draggedId: string | null;
   isReordering: boolean;
-  isOverDropZone: boolean;
   isOverCanvas: boolean;
+  insertionIndex: number | null;
+  hoveredComponentId: string | null;
 }
 
 export function useDragAndDrop(
@@ -21,8 +23,9 @@ export function useDragAndDrop(
     draggedComponentType: null,
     draggedId: null,
     isReordering: false,
-    isOverDropZone: false,
     isOverCanvas: false,
+    insertionIndex: null,
+    hoveredComponentId: null,
   });
 
   const handleDragStart = (event: DragStartEvent) => {
@@ -36,27 +39,58 @@ export function useDragAndDrop(
       draggedComponentType: componentType || dragType,
       draggedId: activeId,
       isReordering,
-      isOverDropZone: false,
       isOverCanvas: false,
+      insertionIndex: null,
+      hoveredComponentId: null,
     });
   };
 
   const handleDragMove = (event: DragMoveEvent) => {
-    const { over } = event;
+    const { over, active } = event;
 
-    // Determine if currently over a dropzone or canvas component
+    // Determine if currently over canvas component
     const overType = over?.data.current?.type as string | undefined;
-    const isOverDropZone = overType === 'dropzone';
     const isOverCanvasComponent = overType === 'canvas-component';
-    const isOverCanvas = isOverDropZone || isOverCanvasComponent;
+    const isOverCanvas = isOverCanvasComponent;
+
+    // Calculate insertion point based on cursor position
+    let insertionIndex: number | null = null;
+    let hoveredComponentId: string | null = null;
+
+    if (isOverCanvas && event.delta) {
+      // Get cursor Y position from the active draggable element
+      const activeRect = active.rect.current.translated;
+      if (activeRect) {
+        const cursorY = activeRect.top + activeRect.height / 2;
+
+        // Get component IDs for calculation
+        const componentIds = layout.map((comp) => comp.id);
+        const draggedComponentId = active.id as string;
+
+        // Calculate insertion point
+        const result = calculateInsertionPoint({
+          cursorY,
+          componentIds,
+          draggedComponentId: dragState.isReordering ? draggedComponentId : null,
+        });
+
+        insertionIndex = result.insertionIndex;
+        hoveredComponentId = result.hoveredComponentId;
+      }
+    }
 
     // Only update state if collision status changed
     setDragState((prev) => {
-      if (prev.isOverDropZone !== isOverDropZone || prev.isOverCanvas !== isOverCanvas) {
+      if (
+        prev.isOverCanvas !== isOverCanvas ||
+        prev.insertionIndex !== insertionIndex ||
+        prev.hoveredComponentId !== hoveredComponentId
+      ) {
         return {
           ...prev,
-          isOverDropZone,
           isOverCanvas,
+          insertionIndex,
+          hoveredComponentId,
         };
       }
       return prev;
@@ -81,18 +115,31 @@ export function useDragAndDrop(
         draggedComponentType: null,
         draggedId: null,
         isReordering: false,
-        isOverDropZone: false,
         isOverCanvas: false,
+        insertionIndex: null,
+        hoveredComponentId: null,
       });
       return;
     }
 
     const activeType = active.data.current?.type as string;
 
+    // Use the calculated insertion index from drag state
+    const { insertionIndex } = dragState;
+
     // Handle reordering existing components on canvas
     if (activeType === 'canvas-component') {
       const oldIndex = layout.findIndex((item) => item.id === active.id);
-      const newIndex = layout.findIndex((item) => item.id === over.id);
+
+      // Use insertion index if available, otherwise fall back to over.id lookup
+      let newIndex: number;
+      if (insertionIndex !== null) {
+        // Adjust insertion index if moving down (account for removal of dragged item)
+        newIndex = insertionIndex > oldIndex ? insertionIndex - 1 : insertionIndex;
+      } else {
+        // Fallback to old behavior
+        newIndex = layout.findIndex((item) => item.id === over.id);
+      }
 
       if (oldIndex !== -1 && newIndex !== -1 && oldIndex !== newIndex) {
         onComponentReorder(oldIndex, newIndex);
@@ -100,7 +147,11 @@ export function useDragAndDrop(
     } else {
       // Handle adding new component from library
       const componentType = active.data.current?.componentType as string;
-      const dropIndex = over.data.current?.index as number;
+
+      // Use insertion index if available, otherwise fall back to index from drop data
+      const dropIndex = insertionIndex !== null
+        ? insertionIndex
+        : (over.data.current?.index as number);
 
       if (componentType && dropIndex !== undefined) {
         onComponentAdd(componentType, dropIndex);
@@ -112,8 +163,9 @@ export function useDragAndDrop(
       draggedComponentType: null,
       draggedId: null,
       isReordering: false,
-      isOverDropZone: false,
       isOverCanvas: false,
+      insertionIndex: null,
+      hoveredComponentId: null,
     });
   };
 
@@ -123,8 +175,9 @@ export function useDragAndDrop(
       draggedComponentType: null,
       draggedId: null,
       isReordering: false,
-      isOverDropZone: false,
       isOverCanvas: false,
+      insertionIndex: null,
+      hoveredComponentId: null,
     });
   };
 

@@ -41,9 +41,17 @@ export function CanvasComponent({
 
   const style = {
     transform: CSS.Transform.toString(transform),
-    transition,
+    transition: isDragging
+      ? 'height 200ms ease-in-out, opacity 150ms ease-in-out, margin 200ms ease-in-out, padding 200ms ease-in-out'
+      : transition,
     opacity: isDragging ? 0 : 1,
     pointerEvents: isDragging ? ('none' as const) : undefined,
+    // Collapse dimensions when dragging to eliminate blank space
+    height: isDragging ? 0 : undefined,
+    overflow: isDragging ? 'hidden' : undefined,
+    margin: isDragging ? 0 : undefined,
+    padding: isDragging ? 0 : undefined,
+    border: isDragging ? 'none' : undefined,
   };
 
   const componentEntry = componentRegistry[componentDefinition.type];
@@ -101,6 +109,7 @@ export function CanvasComponent({
       ref={setNodeRef}
       style={style}
       className="group relative"
+      data-component-id={componentDefinition.id}
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
     >

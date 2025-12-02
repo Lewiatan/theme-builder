@@ -5,8 +5,11 @@ import type { Modifier } from '@dnd-kit/core';
  *
  * Behavior:
  * - Reordering canvas components: Vertical-only restriction (prevents ghost components)
- * - Library components NOT over dropzone: Free X/Y movement
- * - Library components over dropzone: Vertical-only restriction
+ * - Library components: Free X/Y movement (follows cursor naturally)
+ *
+ * Note: Visual feedback for valid drop areas is handled by:
+ * - InsertionIndicator component (shows where component will be inserted)
+ * - DragOverlay border color (green when over canvas)
  */
 export const conditionalAxisRestriction: Modifier = ({ transform, active }) => {
   // Safety check: ensure active and active.data exist

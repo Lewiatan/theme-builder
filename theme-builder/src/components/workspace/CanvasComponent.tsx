@@ -42,7 +42,8 @@ export function CanvasComponent({
   const style = {
     transform: CSS.Transform.toString(transform),
     transition,
-    opacity: isDragging ? 0.5 : 1,
+    opacity: isDragging ? 0 : 1,
+    pointerEvents: isDragging ? ('none' as const) : undefined,
   };
 
   const componentEntry = componentRegistry[componentDefinition.type];

@@ -4,6 +4,8 @@ import type { DragEndEvent, DragStartEvent } from '@dnd-kit/core';
 export interface DragState {
   isDragging: boolean;
   draggedComponentType: string | null;
+  draggedId: string | null;
+  isReordering: boolean;
 }
 
 export function useDragAndDrop(
@@ -14,15 +16,21 @@ export function useDragAndDrop(
   const [dragState, setDragState] = useState<DragState>({
     isDragging: false,
     draggedComponentType: null,
+    draggedId: null,
+    isReordering: false,
   });
 
   const handleDragStart = (event: DragStartEvent) => {
     const componentType = event.active.data.current?.componentType as string;
     const dragType = event.active.data.current?.type as string;
+    const activeId = event.active.id as string;
+    const isReordering = dragType === 'canvas-component';
 
     setDragState({
       isDragging: true,
       draggedComponentType: componentType || dragType,
+      draggedId: activeId,
+      isReordering,
     });
   };
 
@@ -31,7 +39,12 @@ export function useDragAndDrop(
 
     if (!over) {
       // Dropped outside valid drop zone
-      setDragState({ isDragging: false, draggedComponentType: null });
+      setDragState({
+        isDragging: false,
+        draggedComponentType: null,
+        draggedId: null,
+        isReordering: false
+      });
       return;
     }
 
@@ -55,11 +68,21 @@ export function useDragAndDrop(
       }
     }
 
-    setDragState({ isDragging: false, draggedComponentType: null });
+    setDragState({
+      isDragging: false,
+      draggedComponentType: null,
+      draggedId: null,
+      isReordering: false
+    });
   };
 
   const handleDragCancel = () => {
-    setDragState({ isDragging: false, draggedComponentType: null });
+    setDragState({
+      isDragging: false,
+      draggedComponentType: null,
+      draggedId: null,
+      isReordering: false
+    });
   };
 
   return {

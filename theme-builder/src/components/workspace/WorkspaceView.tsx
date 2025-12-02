@@ -1,5 +1,6 @@
-import { useState, useEffect, useCallback } from 'react';
-import { DndContext, PointerSensor, useSensor, useSensors } from '@dnd-kit/core';
+import { useState, useEffect, useCallback, useRef } from 'react';
+import { DndContext, DragOverlay, PointerSensor, useSensor, useSensors } from '@dnd-kit/core';
+import { restrictToVerticalAxis } from '@dnd-kit/modifiers';
 import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
 import {
@@ -46,6 +47,8 @@ export function WorkspaceView() {
     targetPageType: PageType | null;
   }>({ open: false, targetPageType: null });
   const [resetDialogOpen, setResetDialogOpen] = useState(false);
+  const [canvasWidth, setCanvasWidth] = useState<number | null>(null);
+  const canvasRef = useRef<HTMLDivElement>(null);
 
   // Set up drag and drop
   const { dragState, handleDragStart, handleDragEnd, handleDragCancel } = useDragAndDrop(
@@ -66,6 +69,20 @@ export function WorkspaceView() {
     window.addEventListener('beforeunload', handleBeforeUnload);
     return () => window.removeEventListener('beforeunload', handleBeforeUnload);
   }, [hasUnsavedChanges]);
+
+  // Measure canvas width for DragOverlay
+  useEffect(() => {
+    const updateCanvasWidth = () => {
+      if (canvasRef.current) {
+        const width = canvasRef.current.offsetWidth;
+        setCanvasWidth(width);
+      }
+    };
+
+    updateCanvasWidth();
+    window.addEventListener('resize', updateCanvasWidth);
+    return () => window.removeEventListener('resize', updateCanvasWidth);
+  }, [isLibraryCollapsed, isThemeSidebarOpen]);
 
   // Configure sensors for drag operations
   const sensors = useSensors(
@@ -177,13 +194,87 @@ export function WorkspaceView() {
     );
   }
 
+  // Render drag overlay preview
+  const renderDragOverlay = () => {
+    if (!dragState.isDragging) return null;
+
+    let metadata = null;
+
+    // Dragging from library
+    if (dragState.draggedComponentType && componentRegistry[dragState.draggedComponentType]) {
+      metadata = componentRegistry[dragState.draggedComponentType].meta;
+    }
+    // Reordering from canvas
+    else if (dragState.isReordering && dragState.draggedId) {
+      const component = currentLayout.find((item) => item.id === dragState.draggedId);
+      if (component) {
+        const componentEntry = componentRegistry[component.type];
+        if (componentEntry) {
+          metadata = componentEntry.meta;
+        }
+      }
+    }
+
+    if (!metadata) return null;
+
+    return (
+      <div
+        style={{
+          cursor: 'grabbing',
+          borderRadius: '0.5rem',
+          border: '2px solid rgb(59, 130, 246)',
+          backgroundColor: 'rgba(255, 255, 255, 0.9)',
+          backdropFilter: 'blur(4px)',
+          boxShadow: '0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05)',
+          padding: '1rem',
+          width: canvasWidth ? `${canvasWidth}px` : 'auto',
+        }}
+      >
+        <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
+          {/* Icon section */}
+          <div
+            style={{
+              width: '3rem',
+              height: '3rem',
+              flexShrink: 0,
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              borderRadius: '0.375rem',
+              backgroundColor: 'rgb(219, 234, 254)',
+              color: 'rgb(37, 99, 235)',
+              fontSize: '0.875rem',
+              fontWeight: '600',
+            }}
+          >
+            {metadata.icon.slice(0, 2)}
+          </div>
+          {/* Content section */}
+          <div style={{ flex: 1 }}>
+            <div style={{ fontSize: '1rem', fontWeight: '600', color: 'rgb(17, 24, 39)' }}>
+              {metadata.name}
+            </div>
+            <div style={{ fontSize: '0.875rem', color: 'rgb(107, 114, 128)', marginTop: '0.25rem' }}>
+              {metadata.description}
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  };
+
   return (
     <DndContext
       sensors={sensors}
+      modifiers={[restrictToVerticalAxis]}
       onDragStart={handleDragStart}
       onDragEnd={handleDragEnd}
       onDragCancel={handleDragCancel}
     >
+      <DragOverlay dropAnimation={null}>
+        {renderDragOverlay()}
+      </DragOverlay>
+
       <div className="flex h-screen flex-col" role="application" aria-label="Theme Builder Workspace">
         <TopNavigationBar
           currentPageType={currentPageType}
@@ -214,7 +305,7 @@ export function WorkspaceView() {
             role="main"
             aria-label="Page canvas"
           >
-            <div className="w-full">
+            <div ref={canvasRef} className="w-full">
               <Canvas
                 layout={currentLayout}
                 componentRegistry={componentRegistry}

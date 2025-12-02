@@ -1,11 +1,14 @@
 import { useState } from 'react';
-import type { DragEndEvent, DragStartEvent } from '@dnd-kit/core';
+import type { DragEndEvent, DragStartEvent, DragMoveEvent } from '@dnd-kit/core';
+import { toast } from 'sonner';
 
 export interface DragState {
   isDragging: boolean;
   draggedComponentType: string | null;
   draggedId: string | null;
   isReordering: boolean;
+  isOverDropZone: boolean;
+  isOverCanvas: boolean;
 }
 
 export function useDragAndDrop(
@@ -18,6 +21,8 @@ export function useDragAndDrop(
     draggedComponentType: null,
     draggedId: null,
     isReordering: false,
+    isOverDropZone: false,
+    isOverCanvas: false,
   });
 
   const handleDragStart = (event: DragStartEvent) => {
@@ -31,6 +36,30 @@ export function useDragAndDrop(
       draggedComponentType: componentType || dragType,
       draggedId: activeId,
       isReordering,
+      isOverDropZone: false,
+      isOverCanvas: false,
+    });
+  };
+
+  const handleDragMove = (event: DragMoveEvent) => {
+    const { over } = event;
+
+    // Determine if currently over a dropzone or canvas component
+    const overType = over?.data.current?.type as string | undefined;
+    const isOverDropZone = overType === 'dropzone';
+    const isOverCanvasComponent = overType === 'canvas-component';
+    const isOverCanvas = isOverDropZone || isOverCanvasComponent;
+
+    // Only update state if collision status changed
+    setDragState((prev) => {
+      if (prev.isOverDropZone !== isOverDropZone || prev.isOverCanvas !== isOverCanvas) {
+        return {
+          ...prev,
+          isOverDropZone,
+          isOverCanvas,
+        };
+      }
+      return prev;
     });
   };
 
@@ -39,11 +68,21 @@ export function useDragAndDrop(
 
     if (!over) {
       // Dropped outside valid drop zone
+      const activeType = active.data.current?.type as string;
+      const isLibraryComponent = activeType !== 'canvas-component';
+
+      // Show toast feedback for library components dropped outside canvas
+      if (isLibraryComponent) {
+        toast.info('Drop component on the canvas to add it');
+      }
+
       setDragState({
         isDragging: false,
         draggedComponentType: null,
         draggedId: null,
-        isReordering: false
+        isReordering: false,
+        isOverDropZone: false,
+        isOverCanvas: false,
       });
       return;
     }
@@ -72,7 +111,9 @@ export function useDragAndDrop(
       isDragging: false,
       draggedComponentType: null,
       draggedId: null,
-      isReordering: false
+      isReordering: false,
+      isOverDropZone: false,
+      isOverCanvas: false,
     });
   };
 
@@ -81,13 +122,16 @@ export function useDragAndDrop(
       isDragging: false,
       draggedComponentType: null,
       draggedId: null,
-      isReordering: false
+      isReordering: false,
+      isOverDropZone: false,
+      isOverCanvas: false,
     });
   };
 
   return {
     dragState,
     handleDragStart,
+    handleDragMove,
     handleDragEnd,
     handleDragCancel,
   };

@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
-import { DndContext, DragOverlay, PointerSensor, useSensor, useSensors } from '@dnd-kit/core';
-import { restrictToVerticalAxis } from '@dnd-kit/modifiers';
+import { DndContext, DragOverlay, PointerSensor, useSensor, useSensors, pointerWithin } from '@dnd-kit/core';
 import { toast } from 'sonner';
+import { conditionalAxisRestriction } from '../../utils/dragModifiers';
 import { Button } from '@/components/ui/button';
 import {
   AlertDialog,
@@ -51,7 +51,7 @@ export function WorkspaceView() {
   const canvasRef = useRef<HTMLDivElement>(null);
 
   // Set up drag and drop
-  const { dragState, handleDragStart, handleDragEnd, handleDragCancel } = useDragAndDrop(
+  const { dragState, handleDragStart, handleDragMove, handleDragEnd, handleDragCancel } = useDragAndDrop(
     addComponent,
     reorderComponent,
     currentLayout
@@ -217,17 +217,23 @@ export function WorkspaceView() {
 
     if (!metadata) return null;
 
+    // Use full canvas width when over canvas or when reordering, otherwise auto width
+    const shouldUseFullWidth = dragState.isOverCanvas || dragState.isReordering;
+
     return (
       <div
         style={{
           cursor: 'grabbing',
           borderRadius: '0.5rem',
-          border: '2px solid rgb(59, 130, 246)',
+          border: shouldUseFullWidth
+            ? '2px solid rgb(34, 197, 94)' // Green border when over canvas
+            : '2px solid rgb(59, 130, 246)', // Blue border when free dragging
           backgroundColor: 'rgba(255, 255, 255, 0.9)',
           backdropFilter: 'blur(4px)',
           boxShadow: '0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05)',
           padding: '1rem',
-          width: canvasWidth ? `${canvasWidth}px` : 'auto',
+          width: shouldUseFullWidth && canvasWidth ? `${canvasWidth}px` : 'auto',
+          transition: 'width 0.2s ease-in-out, border-color 0.2s ease-in-out',
         }}
       >
         <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
@@ -266,12 +272,14 @@ export function WorkspaceView() {
   return (
     <DndContext
       sensors={sensors}
-      modifiers={[restrictToVerticalAxis]}
+      collisionDetection={pointerWithin}
+      modifiers={[conditionalAxisRestriction]}
       onDragStart={handleDragStart}
+      onDragMove={handleDragMove}
       onDragEnd={handleDragEnd}
       onDragCancel={handleDragCancel}
     >
-      <DragOverlay dropAnimation={null}>
+      <DragOverlay dropAnimation={null} style={{ pointerEvents: 'none' }}>
         {renderDragOverlay()}
       </DragOverlay>
 

@@ -10,6 +10,7 @@ export const DropZone = memo(function DropZone({ index, isActive = false }: Drop
   const { setNodeRef, isOver } = useDroppable({
     id: `dropzone-${index}`,
     data: {
+      type: 'dropzone',
       index,
     },
   });

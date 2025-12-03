@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useSearchParams } from 'react-router';
-import { fetchAllProducts, fetchProductsByCategory, type Product } from '~/lib/api-products';
+import { fetchAllProducts, fetchProductsByCategory } from '~/lib/api-products';
+import type { Product } from '@shared/components/ProductListGrid/types';
 
 /**
  * Return type for the useProducts hook

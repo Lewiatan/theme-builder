@@ -30,7 +30,8 @@ const ProductListGrid: React.FC<ProductListGridProps> = ({
   productsPerRow = 3,
   isLoading = false,
   error = null,
-  onRetry
+  onRetry,
+  onProductClick
 }) => {
   // Calculate appropriate image size based on grid density
   const imageSize = useMemo(() => {
@@ -121,6 +122,7 @@ const ProductListGrid: React.FC<ProductListGridProps> = ({
         columns={productsPerRow}
         imageSize={imageSize}
         isLoading={false}
+        onProductClick={onProductClick}
       />
     </div>
   );

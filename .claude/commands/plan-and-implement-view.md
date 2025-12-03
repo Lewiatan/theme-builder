@@ -25,7 +25,7 @@ After planning completes, display the plan file path and **WAIT for user confirm
 
 **ONLY after user confirmation:**
 
-Read the implementation plan file (captures any user edits), then run `/view-implementation @[PLAN_FILE_PATH]`
+Read the implementation plan file (captures any user edits), and read `@[PLAN_FILE_PATH]`
 
 ## Notes
 

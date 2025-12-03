@@ -114,6 +114,51 @@ class DemoProductRepository
     }
 
     /**
+     * Retrieves a single demo product by ID with category name.
+     *
+     * Uses INNER JOIN to fetch category name in a single query.
+     * Returns null if product doesn't exist.
+     *
+     * SQL Query:
+     * SELECT p.*, c.name AS category_name
+     * FROM demo_products p
+     * INNER JOIN demo_categories c ON p.category_id = c.id
+     * WHERE p.id = :productId
+     *
+     * @param int $productId Product ID to retrieve
+     * @return DemoProductReadModel|null Product read model or null if not found
+     */
+    public function findProductById(int $productId): ?DemoProductReadModel
+    {
+        $sql = '
+            SELECT
+                p.id,
+                p.category_id,
+                c.name AS category_name,
+                p.name,
+                p.description,
+                p.price,
+                p.sale_price,
+                p.image_thumbnail,
+                p.image_medium,
+                p.image_large
+            FROM demo_products p
+            INNER JOIN demo_categories c ON p.category_id = c.id
+            WHERE p.id = :productId
+        ';
+
+        $row = $this->connection->fetchAssociative($sql, [
+            'productId' => $productId,
+        ]);
+
+        if ($row === false) {
+            return null;
+        }
+
+        return $this->mapRowToReadModel($row);
+    }
+
+    /**
      * Checks if a category exists in the database.
      *
      * Used for validation before filtering products by category.

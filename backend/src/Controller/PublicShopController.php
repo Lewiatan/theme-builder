@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Controller;
 
 use App\Exception\CategoryNotFoundException;
+use App\Exception\ProductNotFoundException;
 use App\Model\Enum\PageType;
 use App\Request\GetDemoProductsRequest;
 use App\Service\DemoCategoryService;
@@ -175,6 +176,51 @@ final class PublicShopController extends AbstractController
             );
         } catch (\Throwable $exception) {
             $this->logger->error('Unexpected error retrieving demo categories', [
+                'exception' => $exception->getMessage(),
+                'trace' => $exception->getTraceAsString(),
+            ]);
+
+            return new JsonResponse(
+                ['error' => 'An unexpected error occurred'],
+                JsonResponse::HTTP_INTERNAL_SERVER_ERROR
+            );
+        }
+    }
+
+    /**
+     * Retrieves a single demo product by ID.
+     *
+     * This endpoint provides detailed product information for the Demo Shop product page.
+     * Returns product data with category information. No authentication required.
+     *
+     * @param int $id Product ID
+     * @return JsonResponse Product data (200), not found (404), or error (500)
+     *
+     * Response examples:
+     * - 200 OK: {"id": 1, "name": "Product", "price": 19999, ...}
+     * - 404 Not Found: {"error": "Product with ID 999 not found"}
+     * - 500 Internal Server Error: {"error": "An unexpected error occurred"}
+     */
+    #[Route('/api/demo/products/{id}', name: 'demo_product_detail', requirements: ['id' => '\d+'], methods: ['GET'])]
+    public function getDemoProduct(int $id): JsonResponse
+    {
+        try {
+            $product = $this->demoProductService->getProductById($id);
+
+            return new JsonResponse($product, JsonResponse::HTTP_OK);
+        } catch (ProductNotFoundException $exception) {
+            $this->logger->info('Product not found', [
+                'product_id' => $id,
+                'message' => $exception->getMessage(),
+            ]);
+
+            return new JsonResponse(
+                ['error' => $exception->getMessage()],
+                JsonResponse::HTTP_NOT_FOUND
+            );
+        } catch (\Throwable $exception) {
+            $this->logger->error('Unexpected error retrieving demo product', [
+                'product_id' => $id,
                 'exception' => $exception->getMessage(),
                 'trace' => $exception->getTraceAsString(),
             ]);

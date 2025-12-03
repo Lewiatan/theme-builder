@@ -5,6 +5,20 @@ argument-hint: "<view-description> <user-stories> <endpoint-description> <endpoi
 
 # View Implementation Plan Generator
 
+Orchestrate planning and implementing a REST API endpoint in two phases.
+
+**Required Parameters:**
+- $1: View Description
+- $2: User Stories
+- $3: Endpoint Description
+- $4: Endpoint Implementation
+
+## Phase 1: Parameter Validation
+
+Use `parameter-validation` skill to validate all 3 parameters. **STOP if any are missing** and wait for user input.
+
+## Phase 2: Planning
+
 Use the `architect` skill.
 
 First, review the following information:

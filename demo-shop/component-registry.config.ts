@@ -19,6 +19,7 @@ import CategoryPillsContainer from '~/containers/CategoryPillsContainer';
 import { CategoryPillsPropsSchema } from '@shared/components/CategoryPills';
 import ProductListGridContainer from '~/containers/ProductListGridContainer';
 import { ProductListGridPropsSchema } from '@shared/components/ProductListGrid';
+import { ProductDetail, ProductDetailPropsSchema } from '@shared/components/ProductDetail';
 import type React from 'react';
 
 /**
@@ -53,6 +54,10 @@ const componentRegistryConfig: Record<string, ComponentRegistryEntry> = {
   ProductListGrid: {
     component: ProductListGridContainer,
     schema: ProductListGridPropsSchema,
+  },
+  ProductDetail: {
+    component: ProductDetail,
+    schema: ProductDetailPropsSchema,
   },
 };
 

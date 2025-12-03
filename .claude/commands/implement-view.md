@@ -5,7 +5,18 @@ argument-hint: "<implementation-plan-file-or-content>"
 
 # View Implementation
 
+Orchestrate planning and implementing a REST API endpoint in two phases.
+
+**Required Parameters:**
+- $1: Implementation Plan
+
 Use the `implement-react` skill.
+
+## Phase 1: Parameter Validation
+
+Use `parameter-validation` skill to validate all 3 parameters. **STOP if any are missing** and wait for user input.
+
+## Phase 2: Implementation 
 
 First, review the implementation plan:
 

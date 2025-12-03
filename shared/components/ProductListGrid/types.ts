@@ -11,6 +11,7 @@ import { z } from 'zod';
 export interface Product {
   id: number;
   categoryId: number;
+  categoryName: string;
   name: string;
   description: string;
   price: number; // in cents
@@ -26,6 +27,7 @@ export interface Product {
 export const ProductSchema = z.object({
   id: z.number().int().positive(),
   categoryId: z.number().int().positive(),
+  categoryName: z.string().min(1),
   name: z.string().min(1),
   description: z.string(),
   price: z.number().int().nonnegative(),
@@ -98,6 +100,11 @@ export interface ProductListGridProps {
    * Callback to retry fetching data
    */
   onRetry?: () => void;
+
+  /**
+   * Click handler for product cards
+   */
+  onProductClick?: (productId: number) => void;
 }
 
 /**
@@ -109,6 +116,8 @@ export const ProductListGridPropsSchema = z.object({
   isLoading: z.boolean().default(false),
   error: z.instanceof(Error).nullable().optional(),
   onRetry: z.function().optional(),
+  onProductClick: z.function().optional(),
+  shopId: z.string().uuid().optional(), // For container component navigation
 });
 
 /**

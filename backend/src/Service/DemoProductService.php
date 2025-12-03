@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Service;
 
 use App\Exception\CategoryNotFoundException;
+use App\Exception\ProductNotFoundException;
 use App\ReadModel\DemoProductReadModel;
 use App\Repository\DemoProductRepository;
 
@@ -46,5 +47,23 @@ final class DemoProductService
 
         // Category exists - return filtered products
         return $this->repository->findProductsByCategoryId($categoryId);
+    }
+
+    /**
+     * Retrieves a single demo product by ID.
+     *
+     * @param int $productId Product ID to retrieve
+     * @return DemoProductReadModel Product read model
+     * @throws ProductNotFoundException When product doesn't exist
+     */
+    public function getProductById(int $productId): DemoProductReadModel
+    {
+        $product = $this->repository->findProductById($productId);
+
+        if ($product === null) {
+            throw new ProductNotFoundException($productId);
+        }
+
+        return $product;
     }
 }

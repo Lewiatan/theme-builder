@@ -1,4 +1,5 @@
 import { z } from 'zod';
+import type { Product } from '@shared/components/ProductListGrid/types';
 import { buildApiUrl } from './api';
 
 /**
@@ -18,26 +19,6 @@ const ApiProductSchema = z.object({
   image_large: z.string().min(1),
 });
 
-/**
- * Product schema with camelCase for use in the application
- */
-const ProductSchema = z.object({
-  id: z.number().int().positive(),
-  categoryId: z.number().int().positive(),
-  name: z.string().min(1),
-  description: z.string(),
-  price: z.number().int().nonnegative(),
-  salePrice: z.number().int().nonnegative().nullable(),
-  imageThumbnail: z.string().min(1),
-  imageMedium: z.string().min(1),
-  imageLarge: z.string().min(1),
-});
-
-/**
- * TypeScript type for a single product
- * Inferred from ProductSchema for type safety
- */
-export type Product = z.infer<typeof ProductSchema>;
 
 /**
  * Zod schema for validating products API response (with snake_case fields)
@@ -53,6 +34,7 @@ function transformProduct(apiProduct: z.infer<typeof ApiProductSchema>): Product
   return {
     id: apiProduct.id,
     categoryId: apiProduct.category_id,
+    categoryName: apiProduct.category_name,
     name: apiProduct.name,
     description: apiProduct.description,
     price: apiProduct.price,
@@ -200,5 +182,75 @@ export async function fetchAllProducts(): Promise<Product[]> {
     // Handle unexpected error types
     console.error('Unexpected error fetching products:', error);
     throw new Error('An unexpected error occurred while fetching products');
+  }
+}
+
+/**
+ * Fetches a single product by ID from the backend API
+ *
+ * This function handles both server-side (SSR loader) and client-side fetching.
+ * The API URL is automatically determined based on execution context:
+ * - Server-side: Uses VITE_API_URL environment variable (Vercel/production) or Docker service networking (local dev)
+ * - Client-side: Uses VITE_API_URL environment variable
+ *
+ * @param id - The product ID to fetch
+ * @returns Promise resolving to a single product
+ * @throws Error if fetch fails, product not found, or response validation fails
+ *
+ * @example
+ * ```typescript
+ * // In a React Router loader
+ * export async function loader({ params }: LoaderFunctionArgs) {
+ *   const productId = parseInt(params.productId, 10);
+ *   const product = await fetchProductById(productId);
+ *   return { product };
+ * }
+ * ```
+ */
+export async function fetchProductById(id: number): Promise<Product> {
+  const url = buildApiUrl(`/api/demo/products/${id}`);
+
+  try {
+    const response = await fetch(url, {
+      method: 'GET',
+      headers: {
+        'Accept': 'application/json',
+        'Content-Type': 'application/json',
+      },
+    });
+
+    if (!response.ok) {
+      // Handle 404 specifically for product not found
+      if (response.status === 404) {
+        throw new Error(`Product with ID ${id} not found`);
+      }
+
+      throw new Error(
+        `Failed to fetch product: ${response.status} ${response.statusText}`
+      );
+    }
+
+    const data: unknown = await response.json();
+
+    // Validate response with Zod
+    const validationResult = ApiProductSchema.safeParse(data);
+
+    if (!validationResult.success) {
+      console.error('Product API response validation failed:', validationResult.error);
+      throw new Error('Invalid product data received from server');
+    }
+
+    // Transform API product to application format
+    return transformProduct(validationResult.data);
+  } catch (error) {
+    // Re-throw with context
+    if (error instanceof Error) {
+      console.error(`Error fetching product ${id}:`, error.message);
+      throw error;
+    }
+
+    // Handle unexpected error types
+    console.error('Unexpected error fetching product:', error);
+    throw new Error('An unexpected error occurred while fetching product');
   }
 }

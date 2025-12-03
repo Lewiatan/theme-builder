@@ -1,4 +1,6 @@
-import React from 'react';
+import type { FC } from 'react';
+import { useCallback } from 'react';
+import { useNavigate } from 'react-router';
 import ProductListGrid from '@shared/components/ProductListGrid/ProductListGrid';
 import { useProducts } from '~/hooks/useProducts';
 import type { ProductsPerRow } from '@shared/components/ProductListGrid/types';
@@ -10,6 +12,8 @@ import type { ProductListGridProps } from '@shared/components/ProductListGrid/ty
 export interface ProductListGridContainerProps {
   /** Number of products per row (2, 3, 4, or 6) */
   productsPerRow?: ProductsPerRow;
+  /** Shop ID for navigation to product pages */
+  shopId?: string;
 }
 
 /**
@@ -43,11 +47,21 @@ export interface ProductListGridContainerProps {
  * <ProductListGridContainer productsPerRow={3} />
  * ```
  */
-const ProductListGridContainer: React.FC<ProductListGridContainerProps> = ({
+const ProductListGridContainer: FC<ProductListGridContainerProps> = ({
   productsPerRow = 3,
+  shopId,
 }) => {
+  const navigate = useNavigate();
+
   // Fetch products with automatic category filtering from URL
   const { products, isLoading, error, refetch } = useProducts();
+
+  // Handle product card click - navigate to product detail page
+  const handleProductClick = useCallback((productId: number) => {
+    if (shopId) {
+      navigate(`/shop/${shopId}/product/${productId}`);
+    }
+  }, [shopId, navigate]);
 
   // Build props for presentational component
   const gridProps: ProductListGridProps = {
@@ -56,6 +70,7 @@ const ProductListGridContainer: React.FC<ProductListGridContainerProps> = ({
     isLoading,
     error,
     onRetry: refetch,
+    onProductClick: shopId ? handleProductClick : undefined,
   };
 
   return <ProductListGrid {...gridProps} />;

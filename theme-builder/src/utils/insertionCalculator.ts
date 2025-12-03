@@ -73,6 +73,12 @@ export function calculateInsertionPoint(
       if (!element) return null;
 
       const rect = element.getBoundingClientRect();
+
+      // Skip components with zero height (currently being dragged)
+      if (rect.height === 0) {
+        return null;
+      }
+
       return {
         id,
         top: rect.top,
@@ -114,14 +120,17 @@ export function calculateInsertionPoint(
     const component = componentRects[i];
 
     if (cursorY >= component.top && cursorY <= component.bottom) {
-      // If dragging the component itself, skip it and continue to next
+      // If dragging the component itself, skip it
       if (component.id === draggedComponentId) {
         continue;
       }
 
       // Always insert BELOW (after) the hovered component
+      // Find the actual index in the original componentIds array
+      const actualIndex = componentIds.indexOf(component.id);
+
       return {
-        insertionIndex: i + 1,
+        insertionIndex: actualIndex + 1,
         hoveredComponentId: component.id,
       };
     }

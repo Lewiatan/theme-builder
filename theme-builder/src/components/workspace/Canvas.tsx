@@ -78,6 +78,7 @@ export function Canvas({
             componentRegistry={componentRegistry}
             onDelete={handleDeleteClick}
             index={index}
+            isAnyDragging={dragState?.isDragging || false}
           />
         ))}
 

@@ -12,6 +12,7 @@ export interface CanvasComponentProps {
   onDelete: (id: string) => void;
   onSettings?: (id: string) => void;
   index: number;
+  isAnyDragging?: boolean;
 }
 
 export function CanvasComponent({
@@ -20,6 +21,7 @@ export function CanvasComponent({
   onDelete,
   onSettings,
   index,
+  isAnyDragging = false,
 }: CanvasComponentProps) {
   const [isHovered, setIsHovered] = useState(false);
 
@@ -38,21 +40,6 @@ export function CanvasComponent({
       index,
     },
   });
-
-  const style = {
-    transform: CSS.Transform.toString(transform),
-    transition: isDragging
-      ? 'height 200ms ease-in-out, opacity 150ms ease-in-out, margin 200ms ease-in-out, padding 200ms ease-in-out'
-      : transition,
-    opacity: isDragging ? 0 : 1,
-    pointerEvents: isDragging ? ('none' as const) : undefined,
-    // Collapse dimensions when dragging to eliminate blank space
-    height: isDragging ? 0 : undefined,
-    overflow: isDragging ? 'hidden' : undefined,
-    margin: isDragging ? 0 : undefined,
-    padding: isDragging ? 0 : undefined,
-    border: isDragging ? 'none' : undefined,
-  };
 
   const componentEntry = componentRegistry[componentDefinition.type];
 
@@ -102,6 +89,15 @@ export function CanvasComponent({
     error: null,
     ...componentEntry.defaultProps, // Default props from componentRegistry
     ...componentDefinition.props,    // Saved props from database (overrides defaults)
+  };
+
+  // When any drag is active, disable transforms to freeze components in place
+  // Only the dropbar moves, components stay still until drop
+  const style = {
+    transform: isAnyDragging ? 'none' : CSS.Transform.toString(transform),
+    transition: isAnyDragging ? 'opacity 150ms ease-in-out' : transition,
+    opacity: isDragging ? 0.5 : 1,
+    pointerEvents: isDragging ? ('none' as const) : undefined,
   };
 
   return (

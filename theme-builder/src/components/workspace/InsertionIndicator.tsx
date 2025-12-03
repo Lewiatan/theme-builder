@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import type { ComponentDefinition } from '@/types/api';
 
 export interface InsertionIndicatorProps {
@@ -40,12 +40,18 @@ export function InsertionIndicator({
   draggedComponentId,
 }: InsertionIndicatorProps) {
   const [indicatorY, setIndicatorY] = useState<number | null>(null);
+  const rafIdRef = useRef<number | null>(null);
 
   useEffect(() => {
     // Don't show indicator if not dragging or no insertion index
     if (!isDragging || insertionIndex === null) {
       setIndicatorY(null);
       return;
+    }
+
+    // Cancel any pending animation frame
+    if (rafIdRef.current !== null) {
+      cancelAnimationFrame(rafIdRef.current);
     }
 
     // Calculate pixel position based on insertion index
@@ -105,8 +111,18 @@ export function InsertionIndicator({
       return null;
     };
 
-    const position = calculatePosition();
-    setIndicatorY(position);
+    // Schedule position update using requestAnimationFrame for smoother rendering
+    rafIdRef.current = requestAnimationFrame(() => {
+      const position = calculatePosition();
+      setIndicatorY(position);
+    });
+
+    // Cleanup: cancel animation frame on unmount or dependency change
+    return () => {
+      if (rafIdRef.current !== null) {
+        cancelAnimationFrame(rafIdRef.current);
+      }
+    };
   }, [insertionIndex, layout, isDragging, draggedComponentId]);
 
   // Don't render if not dragging or no position calculated

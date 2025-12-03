@@ -43,14 +43,14 @@ export interface InsertionCalculationResult {
  * Algorithm:
  * 1. Get bounding rectangles for all components in the layout
  * 2. Find which component the cursor is currently over
- * 3. Determine if cursor is in top half or bottom half of that component
- * 4. Return appropriate insertion index (before or after the component)
+ * 3. Always insert BELOW (after) the hovered component
+ * 4. Return appropriate insertion index
  *
  * Edge cases handled:
  * - Empty canvas: Returns index 0
  * - Above first component: Returns index 0
  * - Below last component: Returns index N (after last)
- * - Between components: Calculates based on cursor position relative to component center
+ * - Hovering over component: Always inserts below it (at index i + 1)
  * - Dragging component itself: Accounts for collapsed height in calculation
  */
 export function calculateInsertionPoint(
@@ -114,42 +114,16 @@ export function calculateInsertionPoint(
     const component = componentRects[i];
 
     if (cursorY >= component.top && cursorY <= component.bottom) {
-      const isInTopHalf = cursorY < component.centerY;
-
-      // If dragging the component itself, prevent self-insertion
+      // If dragging the component itself, skip it and continue to next
       if (component.id === draggedComponentId) {
-        // Continue to next component or use adjacent position
-        if (isInTopHalf && i > 0) {
-          // Cursor in top half of dragged component - insert before it
-          return {
-            insertionIndex: i,
-            hoveredComponentId: component.id,
-          };
-        } else if (!isInTopHalf && i < componentRects.length - 1) {
-          // Cursor in bottom half of dragged component - insert after it
-          return {
-            insertionIndex: i + 1,
-            hoveredComponentId: component.id,
-          };
-        }
-        // If at edges, continue searching
         continue;
       }
 
-      // Normal case: cursor over a different component
-      if (isInTopHalf) {
-        // Cursor in top half - insert before this component
-        return {
-          insertionIndex: i,
-          hoveredComponentId: component.id,
-        };
-      } else {
-        // Cursor in bottom half - insert after this component
-        return {
-          insertionIndex: i + 1,
-          hoveredComponentId: component.id,
-        };
-      }
+      // Always insert BELOW (after) the hovered component
+      return {
+        insertionIndex: i + 1,
+        hoveredComponentId: component.id,
+      };
     }
   }
 

@@ -41,12 +41,12 @@ export function TopNavigationBar({
         {/* Left: Page selector and unsaved changes indicator */}
         <div className="flex items-center gap-4">
           <Select value={currentPageType} onValueChange={onPageTypeChange}>
-            <SelectTrigger className="w-[180px]">
+            <SelectTrigger className="w-[180px] cursor-pointer">
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
               {pageTypes.map((type) => (
-                <SelectItem key={type} value={type}>
+                <SelectItem key={type} value={type} className="cursor-pointer">
                   {type.charAt(0).toUpperCase() + type.slice(1)}
                 </SelectItem>
               ))}
@@ -65,7 +65,8 @@ export function TopNavigationBar({
           <Button
             variant="outline"
             onClick={onReset}
-            disabled={!hasUnsavedChanges || isResetting}
+            disabled={isResetting}
+            className="cursor-pointer"
           >
             {isResetting ? 'Resetting...' : 'Reset'}
           </Button>
@@ -73,17 +74,19 @@ export function TopNavigationBar({
           <Button
             onClick={onSave}
             disabled={!hasUnsavedChanges || isSaving}
+            className="cursor-pointer"
           >
             {isSaving ? 'Saving...' : 'Save'}
           </Button>
 
-          <Button variant="outline" onClick={onDemo} data-testid="demo-button">
+          <Button variant="outline" onClick={onDemo} data-testid="demo-button" className="cursor-pointer">
             Demo
           </Button>
 
           <Button
             variant={isThemeSidebarOpen ? 'default' : 'outline'}
             onClick={onThemeToggle}
+            className="cursor-pointer"
           >
             Theme
           </Button>

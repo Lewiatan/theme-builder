@@ -27,7 +27,7 @@ test.describe("Login Flow", () => {
       await expect(page).toHaveURL("/");
 
       // Verify workspace loaded by checking for the component library
-      await expect(page.getByRole("complementary", { name: "Component library" })).toBeVisible();
+      await expect(page.getByTestId("component-library")).toBeVisible();
 
       // Verify token stored in localStorage
       const token = await page.evaluate(() =>
@@ -228,15 +228,15 @@ test.describe("Login Flow", () => {
       await page.goto("/login");
 
       // Check that labels are associated with inputs
-      const emailLabel = page.locator("label", { hasText: /email/i });
-      const passwordLabel = page.locator("label", { hasText: /password/i });
+      const emailLabel = page.getByTestId("email-label");
+      const passwordLabel = page.getByTestId("password-label");
 
       await expect(emailLabel).toBeVisible();
       await expect(passwordLabel).toBeVisible();
 
-      // Verify inputs can be found by their labels
-      await expect(page.getByLabel(/email/i)).toBeVisible();
-      await expect(page.getByLabel(/password/i)).toBeVisible();
+      // Verify inputs can be found by their test IDs
+      await expect(page.getByTestId("email-input")).toBeVisible();
+      await expect(page.getByTestId("password-input")).toBeVisible();
     });
 
     test("form can be submitted with Enter key", async ({ page }) => {

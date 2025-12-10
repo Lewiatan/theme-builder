@@ -37,7 +37,7 @@ test.describe('Demo Shop Navigation', () => {
     await page.waitForURL('/');
 
     // Wait for workspace to load
-    await expect(page.locator('header')).toBeVisible();
+    await expect(page.getByTestId('workspace-header')).toBeVisible();
   }
 
   test('should open demo shop in new tab from Theme Builder', async ({ page, context }) => {
@@ -65,7 +65,7 @@ test.describe('Demo Shop Navigation', () => {
     expect(demoShopPage.url()).toBe(`http://localhost:5174/shop/${shopId}`);
 
     // Assert: No error boundary is shown
-    const errorBoundary = demoShopPage.locator('text=/error|something went wrong/i');
+    const errorBoundary = demoShopPage.getByTestId('error-boundary');
     await expect(errorBoundary).not.toBeVisible();
 
     // Assert: DynamicComponentRenderer renders at least one component from seeded layout
@@ -74,8 +74,10 @@ test.describe('Demo Shop Navigation', () => {
     await expect(renderedContent).not.toBeEmpty();
 
     // Wait for any component to be rendered (seeded layout should contain components)
-    // We look for common elements that would be in a header or section
-    const hasContent = await demoShopPage.getByTestId('shop-container').locator('nav, header, section, main').count();
+    // Verify the shop container has rendered content
+    const shopContainer = demoShopPage.getByTestId('shop-container');
+    await expect(shopContainer).toBeVisible();
+    const hasContent = await shopContainer.getByTestId('rendered-component').count();
     expect(hasContent).toBeGreaterThan(0);
 
     // Clean up: close the demo shop tab

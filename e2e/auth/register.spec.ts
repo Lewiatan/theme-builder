@@ -305,9 +305,9 @@ test.describe("Registration Flow", () => {
       await page.goto("/register");
 
       // Check that labels are associated with inputs
-      const emailLabel = page.locator("label", { hasText: /email/i });
-      const passwordLabel = page.locator("label", { hasText: /password/i });
-      const shopNameLabel = page.locator("label", { hasText: /shop name/i });
+      const emailLabel = page.getByTestId("email-label");
+      const passwordLabel = page.getByTestId("password-label");
+      const shopNameLabel = page.getByTestId("shop-name-label");
 
       await expect(emailLabel).toBeVisible();
       await expect(passwordLabel).toBeVisible();

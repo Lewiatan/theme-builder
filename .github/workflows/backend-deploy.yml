@@ -72,6 +72,25 @@ jobs:
           npm ci
           npx playwright install --with-deps chromium
 
+      - name: Create .env file for Docker Compose
+        run: |
+          cat > .env << 'EOF'
+          POSTGRES_DB=builder
+          POSTGRES_USER=builder
+          POSTGRES_PASSWORD=builder
+          PGADMIN_DEFAULT_EMAIL=admin@example.com
+          PGADMIN_DEFAULT_PASSWORD=admin
+          APP_ENV=dev
+          APP_SECRET=test-secret-key
+          DATABASE_URL=postgresql://builder:builder@postgres:5432/builder?serverVersion=16&charset=utf8
+          CORS_ALLOW_ORIGIN=.*
+          JWT_SECRET_KEY=%kernel.project_dir%/config/jwt/private.pem
+          JWT_PUBLIC_KEY=%kernel.project_dir%/config/jwt/public.pem
+          JWT_PASSPHRASE=
+          VITE_API_URL=http://localhost:8000
+          VITE_DEMO_SHOP_URL=http://localhost:5174
+          EOF
+
       - name: Start Docker Compose services
         run: docker compose up -d --wait
 

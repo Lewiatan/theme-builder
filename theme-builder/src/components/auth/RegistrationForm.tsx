@@ -156,7 +156,7 @@ export function RegistrationForm() {
 
           {/* Email Field */}
           <div className="space-y-2">
-            <Label htmlFor="email">Email</Label>
+            <Label htmlFor="email" data-testid="email-label">Email</Label>
             <Input
               id="email"
               type="email"
@@ -174,7 +174,7 @@ export function RegistrationForm() {
 
           {/* Password Field */}
           <div className="space-y-2">
-            <Label htmlFor="password">Password</Label>
+            <Label htmlFor="password" data-testid="password-label">Password</Label>
             <Input
               id="password"
               type="password"
@@ -192,7 +192,7 @@ export function RegistrationForm() {
 
           {/* Shop Name Field */}
           <div className="space-y-2">
-            <Label htmlFor="shopName">Shop Name</Label>
+            <Label htmlFor="shopName" data-testid="shop-name-label">Shop Name</Label>
             <Input
               id="shopName"
               type="text"

@@ -132,7 +132,7 @@ export function LoginForm() {
 
           {/* Email Field */}
           <div className="space-y-2">
-            <Label htmlFor="email">Email</Label>
+            <Label htmlFor="email" data-testid="email-label">Email</Label>
             <Input
               id="email"
               type="email"
@@ -150,7 +150,7 @@ export function LoginForm() {
 
           {/* Password Field */}
           <div className="space-y-2">
-            <Label htmlFor="password">Password</Label>
+            <Label htmlFor="password" data-testid="password-label">Password</Label>
             <Input
               id="password"
               type="password"

@@ -122,7 +122,11 @@ function renderComponent(config: ComponentConfig, index: number, runtimeProps?: 
   const Component = componentRegistry[type];
 
   // Render component with validated props
-  return <Component key={id || `component-${index}`} {...validation.data} />;
+  return (
+    <div key={id || `component-${index}`} data-testid="rendered-component">
+      <Component {...validation.data} />
+    </div>
+  );
 }
 
 /**

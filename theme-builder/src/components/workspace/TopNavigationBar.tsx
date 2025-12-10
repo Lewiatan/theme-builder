@@ -36,12 +36,12 @@ export function TopNavigationBar({
   isThemeSidebarOpen,
 }: TopNavigationBarProps) {
   return (
-    <header className="border-b bg-white px-6 py-4">
+    <header className="border-b bg-white px-6 py-4" data-testid="workspace-header">
       <div className="flex items-center justify-between">
         {/* Left: Page selector and unsaved changes indicator */}
         <div className="flex items-center gap-4">
           <Select value={currentPageType} onValueChange={onPageTypeChange}>
-            <SelectTrigger className="w-[180px] cursor-pointer">
+            <SelectTrigger className="w-[180px] cursor-pointer" data-testid="page-selector">
               <SelectValue />
             </SelectTrigger>
             <SelectContent>

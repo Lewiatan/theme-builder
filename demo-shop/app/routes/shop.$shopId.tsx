@@ -123,7 +123,7 @@ export function ErrorBoundary({ error }: Route.ErrorBoundaryProps) {
     }
 
     return (
-      <div className="min-h-screen flex items-center justify-center p-4">
+      <div className="min-h-screen flex items-center justify-center p-4" data-testid="error-boundary">
         <div className="max-w-md w-full">
           <Alert variant="destructive">
             <AlertTitle className="text-lg font-semibold mb-2">
@@ -162,7 +162,7 @@ export function ErrorBoundary({ error }: Route.ErrorBoundaryProps) {
 
   // Handle unexpected React rendering errors
   return (
-    <div className="min-h-screen flex items-center justify-center p-4">
+    <div className="min-h-screen flex items-center justify-center p-4" data-testid="error-boundary">
       <div className="max-w-md w-full">
         <Alert variant="destructive">
           <AlertTitle className="text-lg font-semibold mb-2">

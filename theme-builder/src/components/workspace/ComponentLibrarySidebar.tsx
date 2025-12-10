@@ -61,7 +61,7 @@ export function ComponentLibrarySidebar({
   }
 
   return (
-    <aside className="w-80 border-r bg-gray-50 p-4" role="complementary" aria-label="Component library">
+    <aside className="w-80 border-r bg-gray-50 p-4" role="complementary" aria-label="Component library" data-testid="component-library">
       {/* Header */}
       <div className="mb-4 flex items-center justify-between">
         <h2 className="text-lg font-semibold text-gray-900">Components</h2>

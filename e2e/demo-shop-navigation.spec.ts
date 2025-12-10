@@ -69,14 +69,10 @@ test.describe('Demo Shop Navigation', () => {
     await expect(errorBoundary).not.toBeVisible();
 
     // Assert: DynamicComponentRenderer renders at least one component from seeded layout
-    // Based on ExampleShopSeeder, the home page should have a HeaderNavigation component
-    const renderedContent = demoShopPage.getByTestId('demo-shop-body');
-    await expect(renderedContent).not.toBeEmpty();
-
-    // Wait for any component to be rendered (seeded layout should contain components)
-    // Verify the shop container has rendered content
     const shopContainer = demoShopPage.getByTestId('shop-container');
     await expect(shopContainer).toBeVisible();
+
+    // Verify the shop container has rendered components
     const hasContent = await shopContainer.getByTestId('rendered-component').count();
     expect(hasContent).toBeGreaterThan(0);
 

@@ -102,9 +102,20 @@ jobs:
 
       - name: Setup backend
         run: |
+          echo "Creating .env file inside backend container..."
+          docker compose exec -T backend bash -c 'cat > /var/www/html/.env << EOF
+APP_ENV=dev
+APP_SECRET=test-secret-key
+DATABASE_URL=postgresql://builder:builder@postgres:5432/builder?serverVersion=16&charset=utf8
+CORS_ALLOW_ORIGIN=.*
+JWT_SECRET_KEY=%kernel.project_dir%/config/jwt/private.pem
+JWT_PUBLIC_KEY=%kernel.project_dir%/config/jwt/public.pem
+JWT_PASSPHRASE=
+EOF'
+
           echo "Warming up Symfony cache..."
-          docker compose exec -T backend php bin/console cache:clear --env=dev || echo "Cache clear failed"
-          docker compose exec -T backend php bin/console cache:warmup --env=dev || echo "Cache warmup failed"
+          docker compose exec -T backend php bin/console cache:clear --env=dev
+          docker compose exec -T backend php bin/console cache:warmup --env=dev
 
           echo "Running database migrations..."
           docker compose exec -T backend vendor/bin/phinx migrate -e development || echo "Migrations already applied or failed"

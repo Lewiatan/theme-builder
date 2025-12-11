@@ -110,21 +110,43 @@ jobs:
           echo "Verifying .env file contents:"
           cat .env
 
-      - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v3
+      - name: Cache Docker images
+        uses: actions/cache@v4
+        id: docker-cache
         with:
-          driver-opts: |
-            image=moby/buildkit:latest
-            network=host
+          path: /tmp/docker-images
+          key: docker-images-${{ runner.os }}-${{ hashFiles('**/Dockerfile', 'docker-compose.yml', '**/package.json', 'backend/composer.json') }}
+          restore-keys: |
+            docker-images-${{ runner.os }}-
 
-      - name: Start Docker Compose services
+      - name: Load cached Docker images
+        if: steps.docker-cache.outputs.cache-hit == 'true'
+        run: |
+          if [ -d "/tmp/docker-images" ]; then
+            echo "Loading cached Docker images..."
+            for image in /tmp/docker-images/*.tar; do
+              if [ -f "$image" ]; then
+                docker load -i "$image"
+              fi
+            done
+          fi
+
+      - name: Build and start Docker Compose services
         run: |
           export DOCKER_BUILDKIT=1
           export COMPOSE_DOCKER_CLI_BUILD=1
-          docker compose build --build-arg BUILDKIT_INLINE_CACHE=1 \
-            --cache-from type=gha \
-            --cache-to type=gha,mode=max
+          docker compose build
           docker compose up -d
+
+      - name: Save Docker images to cache
+        if: steps.docker-cache.outputs.cache-hit != 'true'
+        run: |
+          mkdir -p /tmp/docker-images
+          docker images --format "{{.Repository}}:{{.Tag}}" | grep "theme-builder" | while read image; do
+            echo "Saving $image..."
+            safe_name=$(echo "$image" | tr '/:' '_')
+            docker save "$image" -o "/tmp/docker-images/${safe_name}.tar"
+          done
 
       - name: Verify environment variables in containers
         run: |

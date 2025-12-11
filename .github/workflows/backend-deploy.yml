@@ -151,6 +151,10 @@ jobs:
           docker compose exec -T backend php bin/console cache:clear --env=dev
           docker compose exec -T backend php bin/console cache:warmup --env=dev
 
+          echo "Generating JWT keypair..."
+          docker compose exec -T backend php bin/console lexik:jwt:generate-keypair --skip-if-exists
+          echo "JWT keypair generated successfully!"
+
           echo "Running database migrations..."
           docker compose exec -T backend vendor/bin/phinx migrate -e development || echo "Migrations already applied or failed"
           docker compose exec -T backend vendor/bin/phinx seed:run -e development || echo "Seeds already applied or failed"

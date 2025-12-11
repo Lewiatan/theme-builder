@@ -89,6 +89,7 @@ jobs:
           JWT_PASSPHRASE=
           VITE_API_URL=http://localhost:8000
           VITE_DEMO_SHOP_URL=http://localhost:5174
+          SKIP_COMPOSER_INSTALL=true
           EOF
 
           echo "Verifying .env file contents:"
@@ -116,12 +117,6 @@ jobs:
           timeout 30 bash -c 'until docker compose exec -T postgres pg_isready -U builder; do echo "PostgreSQL not ready, waiting..."; sleep 2; done'
           echo "PostgreSQL is ready!"
 
-      - name: Wait for backend composer install
-        run: |
-          echo "Waiting for composer install to complete..."
-          timeout 120 bash -c 'until docker compose exec -T backend test -d vendor; do echo "Vendor directory not ready, waiting..."; sleep 3; done'
-          echo "Vendor directory exists!"
-
       - name: Setup backend
         run: |
           echo "Creating .env file inside backend container..."
@@ -135,19 +130,18 @@ jobs:
             echo 'JWT_PASSPHRASE=' >> /var/www/html/.env
           "
 
-          echo "Checking if symfony/runtime is installed..."
-          if docker compose exec -T backend test -d vendor/symfony/runtime; then
-            echo "✓ Symfony runtime is already installed!"
-          else
-            echo "✗ Symfony runtime missing! Reinstalling all composer dependencies..."
-            echo "Removing incomplete vendor directory..."
-            docker compose exec -T backend rm -rf vendor
-            echo "Running fresh composer install with memory limit..."
-            docker compose exec -T backend bash -c "COMPOSER_MEMORY_LIMIT=-1 composer install --no-interaction --no-dev --no-scripts --classmap-authoritative"
-          fi
+          echo "Installing composer dependencies with optimized settings..."
+          docker compose exec -T backend bash -c "COMPOSER_MEMORY_LIMIT=-1 composer install --no-interaction --no-dev --no-scripts --classmap-authoritative"
 
           echo "Verifying Symfony runtime installation..."
-          docker compose exec -T backend test -d vendor/symfony/runtime && echo "✓ Symfony runtime is now installed!" || echo "✗ FAILED: Symfony runtime still missing!"
+          if docker compose exec -T backend test -d vendor/symfony/runtime; then
+            echo "✓ Symfony runtime is installed!"
+          else
+            echo "✗ FAILED: Symfony runtime still missing!"
+            echo "Listing vendor/symfony directory:"
+            docker compose exec -T backend ls -la vendor/symfony/ || echo "vendor/symfony directory doesn't exist"
+            exit 1
+          fi
 
           echo "Warming up Symfony cache..."
           docker compose exec -T backend php bin/console cache:clear --env=dev

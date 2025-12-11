@@ -116,6 +116,12 @@ jobs:
           timeout 30 bash -c 'until docker compose exec -T postgres pg_isready -U builder; do echo "PostgreSQL not ready, waiting..."; sleep 2; done'
           echo "PostgreSQL is ready!"
 
+      - name: Wait for backend composer install
+        run: |
+          echo "Waiting for composer install to complete..."
+          timeout 120 bash -c 'until docker compose exec -T backend test -d vendor; do echo "Vendor directory not ready, waiting..."; sleep 3; done'
+          echo "Composer dependencies are installed!"
+
       - name: Setup backend
         run: |
           echo "Creating .env file inside backend container..."
@@ -128,6 +134,9 @@ jobs:
             echo 'JWT_PUBLIC_KEY=%kernel.project_dir%/config/jwt/public.pem' >> /var/www/html/.env && \
             echo 'JWT_PASSPHRASE=' >> /var/www/html/.env
           "
+
+          echo "Verifying Symfony installation..."
+          docker compose exec -T backend ls -la vendor/ | head -20
 
           echo "Warming up Symfony cache..."
           docker compose exec -T backend php bin/console cache:clear --env=dev

@@ -130,8 +130,11 @@ jobs:
             echo 'JWT_PASSPHRASE=' >> /var/www/html/.env
           "
 
-          echo "Installing composer dependencies with optimized settings..."
-          docker compose exec -T backend bash -c "COMPOSER_MEMORY_LIMIT=-1 composer install --no-interaction --no-dev --no-scripts --classmap-authoritative"
+          echo "Installing composer dependencies (step 1: packages only, no autoloader)..."
+          docker compose exec -T backend bash -c "COMPOSER_MEMORY_LIMIT=-1 composer install --no-interaction --no-dev --no-scripts --no-autoloader"
+
+          echo "Generating basic autoloader (step 2: minimal memory usage)..."
+          docker compose exec -T backend bash -c "composer dump-autoload --no-dev"
 
           echo "Verifying Symfony runtime installation..."
           if docker compose exec -T backend test -d vendor/symfony/runtime; then

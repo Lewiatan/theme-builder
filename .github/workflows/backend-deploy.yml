@@ -120,7 +120,7 @@ jobs:
         run: |
           echo "Waiting for composer install to complete..."
           timeout 120 bash -c 'until docker compose exec -T backend test -d vendor; do echo "Vendor directory not ready, waiting..."; sleep 3; done'
-          echo "Composer dependencies are installed!"
+          echo "Vendor directory exists!"
 
       - name: Setup backend
         run: |
@@ -135,8 +135,14 @@ jobs:
             echo 'JWT_PASSPHRASE=' >> /var/www/html/.env
           "
 
-          echo "Verifying Symfony installation..."
-          docker compose exec -T backend ls -la vendor/ | head -20
+          echo "Checking for Symfony packages..."
+          docker compose exec -T backend ls -la vendor/ | grep symfony || echo "No Symfony packages found!"
+
+          echo "Re-running composer install to ensure all packages are installed..."
+          docker compose exec -T backend composer install --no-interaction --optimize-autoloader
+
+          echo "Verifying Symfony installation after composer install..."
+          docker compose exec -T backend ls -la vendor/symfony/ | head -20 || echo "Symfony still not installed!"
 
           echo "Warming up Symfony cache..."
           docker compose exec -T backend php bin/console cache:clear --env=dev

@@ -33,18 +33,17 @@ jobs:
           echo "APP_SECRET=test-secret-key" >> .env
           echo "DATABASE_URL=postgresql://test:test@localhost:5432/test" >> .env
 
+      - name: Cache Composer dependencies
+        uses: actions/cache@v4
+        with:
+          path: backend/vendor
+          key: composer-${{ runner.os }}-${{ hashFiles('backend/composer.lock') }}
+          restore-keys: |
+            composer-${{ runner.os }}-
+
       - name: Install dependencies
         working-directory: backend
         run: composer install --optimize-autoloader --no-interaction --prefer-dist
-
-      # - name: Run PHPStan
-      #   working-directory: backend
-      #   run: |
-      #     if [ -f "vendor/bin/phpstan" ]; then
-      #       vendor/bin/phpstan analyse
-      #     else
-      #       echo "PHPStan not found, skipping static analysis"
-      #     fi
 
       - name: Run PHPUnit
         working-directory: backend
@@ -66,11 +65,27 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: '20'
+          cache: 'npm'
+
+      - name: Cache Playwright browsers
+        uses: actions/cache@v4
+        id: playwright-cache
+        with:
+          path: ~/.cache/ms-playwright
+          key: playwright-${{ runner.os }}-${{ hashFiles('package-lock.json') }}
+          restore-keys: |
+            playwright-${{ runner.os }}-
 
       - name: Install Playwright dependencies
-        run: |
-          npm ci
-          npx playwright install --with-deps chromium
+        run: npm ci
+
+      - name: Install Playwright browsers
+        if: steps.playwright-cache.outputs.cache-hit != 'true'
+        run: npx playwright install --with-deps chromium
+
+      - name: Install Playwright system dependencies
+        if: steps.playwright-cache.outputs.cache-hit == 'true'
+        run: npx playwright install-deps chromium
 
       - name: Create .env file for Docker Compose
         run: |

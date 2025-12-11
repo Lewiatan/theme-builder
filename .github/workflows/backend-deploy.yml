@@ -148,6 +148,24 @@ jobs:
             docker save "$image" -o "/tmp/docker-images/${safe_name}.tar"
           done
 
+      - name: Verify containers are running
+        run: |
+          echo "Checking container status..."
+          docker compose ps
+
+          echo "Waiting for containers to be healthy..."
+          sleep 10
+
+          # Check if backend container is running
+          if ! docker compose ps backend | grep -q "Up"; then
+            echo "ERROR: Backend container is not running!"
+            echo "Backend logs:"
+            docker compose logs backend
+            exit 1
+          fi
+
+          echo "All containers are running successfully!"
+
       - name: Verify environment variables in containers
         run: |
           echo "Checking theme-builder environment variables:"

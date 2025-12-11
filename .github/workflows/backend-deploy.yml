@@ -110,61 +110,8 @@ jobs:
           echo "Verifying .env file contents:"
           cat .env
 
-      - name: Cache Docker images
-        uses: actions/cache@v4
-        id: docker-cache
-        with:
-          path: /tmp/docker-images
-          key: docker-images-${{ runner.os }}-${{ hashFiles('**/Dockerfile', 'docker-compose.yml', '**/package.json', 'backend/composer.json') }}
-          restore-keys: |
-            docker-images-${{ runner.os }}-
-
-      - name: Load cached Docker images
-        if: steps.docker-cache.outputs.cache-hit == 'true'
-        run: |
-          if [ -d "/tmp/docker-images" ]; then
-            echo "Loading cached Docker images..."
-            for image in /tmp/docker-images/*.tar; do
-              if [ -f "$image" ]; then
-                docker load -i "$image"
-              fi
-            done
-          fi
-
-      - name: Build and start Docker Compose services
-        run: |
-          export DOCKER_BUILDKIT=1
-          export COMPOSE_DOCKER_CLI_BUILD=1
-          docker compose build
-          docker compose up -d
-
-      - name: Save Docker images to cache
-        if: steps.docker-cache.outputs.cache-hit != 'true'
-        run: |
-          mkdir -p /tmp/docker-images
-          docker images --format "{{.Repository}}:{{.Tag}}" | grep "theme-builder" | while read image; do
-            echo "Saving $image..."
-            safe_name=$(echo "$image" | tr '/:' '_')
-            docker save "$image" -o "/tmp/docker-images/${safe_name}.tar"
-          done
-
-      - name: Verify containers are running
-        run: |
-          echo "Checking container status..."
-          docker compose ps
-
-          echo "Waiting for containers to be healthy..."
-          sleep 10
-
-          # Check if backend container is running
-          if ! docker compose ps backend | grep -q "Up"; then
-            echo "ERROR: Backend container is not running!"
-            echo "Backend logs:"
-            docker compose logs backend
-            exit 1
-          fi
-
-          echo "All containers are running successfully!"
+      - name: Start Docker Compose services
+        run: docker compose up -d
 
       - name: Verify environment variables in containers
         run: |

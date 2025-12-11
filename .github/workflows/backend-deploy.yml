@@ -136,13 +136,17 @@ jobs:
           "
 
           echo "Checking for Symfony packages..."
-          docker compose exec -T backend ls -la vendor/ | grep symfony || echo "No Symfony packages found!"
+          if docker compose exec -T backend test -d vendor/symfony; then
+            echo "Symfony packages are already installed!"
+          else
+            echo "Symfony packages missing! Re-running composer install..."
+            docker compose exec -T backend composer install --no-interaction --no-scripts
+            echo "Generating autoload files..."
+            docker compose exec -T backend composer dump-autoload --no-scripts
+          fi
 
-          echo "Re-running composer install to ensure all packages are installed..."
-          docker compose exec -T backend composer install --no-interaction --optimize-autoloader
-
-          echo "Verifying Symfony installation after composer install..."
-          docker compose exec -T backend ls -la vendor/symfony/ | head -20 || echo "Symfony still not installed!"
+          echo "Verifying Symfony installation..."
+          docker compose exec -T backend ls -la vendor/symfony/ | head -10
 
           echo "Warming up Symfony cache..."
           docker compose exec -T backend php bin/console cache:clear --env=dev

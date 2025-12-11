@@ -135,18 +135,19 @@ jobs:
             echo 'JWT_PASSPHRASE=' >> /var/www/html/.env
           "
 
-          echo "Checking for Symfony packages..."
-          if docker compose exec -T backend test -d vendor/symfony; then
-            echo "Symfony packages are already installed!"
+          echo "Checking if symfony/runtime is installed..."
+          if docker compose exec -T backend test -d vendor/symfony/runtime; then
+            echo "✓ Symfony runtime is already installed!"
           else
-            echo "Symfony packages missing! Re-running composer install..."
-            docker compose exec -T backend composer install --no-interaction --no-scripts
-            echo "Generating autoload files..."
-            docker compose exec -T backend composer dump-autoload --no-scripts
+            echo "✗ Symfony runtime missing! Reinstalling all composer dependencies..."
+            echo "Removing incomplete vendor directory..."
+            docker compose exec -T backend rm -rf vendor
+            echo "Running fresh composer install with memory limit..."
+            docker compose exec -T backend bash -c "COMPOSER_MEMORY_LIMIT=-1 composer install --no-interaction --no-dev --no-scripts --classmap-authoritative"
           fi
 
-          echo "Verifying Symfony installation..."
-          docker compose exec -T backend ls -la vendor/symfony/ | head -10
+          echo "Verifying Symfony runtime installation..."
+          docker compose exec -T backend test -d vendor/symfony/runtime && echo "✓ Symfony runtime is now installed!" || echo "✗ FAILED: Symfony runtime still missing!"
 
           echo "Warming up Symfony cache..."
           docker compose exec -T backend php bin/console cache:clear --env=dev

@@ -124,6 +124,7 @@ jobs:
             echo 'APP_ENV=dev' > /var/www/html/.env && \
             echo 'APP_SECRET=test-secret-key' >> /var/www/html/.env && \
             echo 'DATABASE_URL=postgresql://builder:builder@postgres:5432/builder?serverVersion=16&charset=utf8' >> /var/www/html/.env && \
+            echo 'DEFAULT_URI=http://localhost:8000' >> /var/www/html/.env && \
             echo 'CORS_ALLOW_ORIGIN=.*' >> /var/www/html/.env && \
             echo 'JWT_SECRET_KEY=%kernel.project_dir%/config/jwt/private.pem' >> /var/www/html/.env && \
             echo 'JWT_PUBLIC_KEY=%kernel.project_dir%/config/jwt/public.pem' >> /var/www/html/.env && \

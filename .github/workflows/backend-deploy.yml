@@ -110,8 +110,21 @@ jobs:
           echo "Verifying .env file contents:"
           cat .env
 
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+        with:
+          driver-opts: |
+            image=moby/buildkit:latest
+            network=host
+
       - name: Start Docker Compose services
-        run: docker compose up -d
+        run: |
+          export DOCKER_BUILDKIT=1
+          export COMPOSE_DOCKER_CLI_BUILD=1
+          docker compose build --build-arg BUILDKIT_INLINE_CACHE=1 \
+            --cache-from type=gha \
+            --cache-to type=gha,mode=max
+          docker compose up -d
 
       - name: Verify environment variables in containers
         run: |

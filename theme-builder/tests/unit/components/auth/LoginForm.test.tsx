@@ -165,6 +165,24 @@ describe('LoginForm', () => {
 
     it('shows loading state during submission', async () => {
       const user = userEvent.setup();
+
+      // Create a promise we can control to test loading state
+      let resolveLogin: (value: any) => void;
+      const loginPromise = new Promise((resolve) => {
+        resolveLogin = resolve;
+      });
+
+      // Add controlled delay to login endpoint for this test only
+      const { http, HttpResponse } = await import('msw');
+      server.use(
+        http.post('http://localhost:8000/api/auth/login', async () => {
+          await loginPromise; // Wait for our signal
+          return HttpResponse.json({
+            token: 'mock-jwt-token-12345',
+          });
+        })
+      );
+
       renderLoginForm();
 
       const emailInput = screen.getByLabelText(/email/i);
@@ -175,14 +193,27 @@ describe('LoginForm', () => {
 
       const submitButton = screen.getByRole('button', { name: /login/i });
 
-      // Start submission - don't await so we can check loading state
-      user.click(submitButton);
+      // Click the submit button (this starts the async submission)
+      const clickPromise = user.click(submitButton);
+
+      // Wait a tick for React to process the state update
+      await new Promise(resolve => setTimeout(resolve, 0));
 
       // Check for loading state - button text changes and becomes disabled
-      await waitFor(() => {
-        expect(screen.getByRole('button', { name: /logging in/i })).toBeInTheDocument();
-      });
-      expect(screen.getByRole('button', { name: /logging in/i })).toBeDisabled();
+      await waitFor(
+        () => {
+          const button = screen.queryByRole('button', { name: /logging in/i });
+          expect(button).toBeInTheDocument();
+          expect(button).toBeDisabled();
+        },
+        { timeout: 500 }
+      );
+
+      // Now resolve the login to complete submission
+      resolveLogin!(undefined);
+
+      // Wait for the click to complete
+      await clickPromise;
 
       // Wait for submission to complete
       await waitFor(() => {

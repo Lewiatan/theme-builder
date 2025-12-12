@@ -51,7 +51,7 @@ export interface InsertionCalculationResult {
  * - Above first component: Returns index 0
  * - Below last component: Returns index N (after last)
  * - Hovering over component: Always inserts below it (at index i + 1)
- * - Dragging component itself: Accounts for collapsed height in calculation
+ * - Dragging component itself: Skips it and continues searching (accounts for collapsed height)
  */
 export function calculateInsertionPoint(
   params: InsertionCalculationParams

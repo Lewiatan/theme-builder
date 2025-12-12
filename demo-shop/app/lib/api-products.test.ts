@@ -46,6 +46,7 @@ describe('fetchProductsByCategory', () => {
       {
         id: 1,
         categoryId: 10,
+        categoryName: 'Cameras',
         name: 'DSLR Camera',
         description: 'High quality camera',
         price: 100_00,
@@ -149,6 +150,7 @@ describe('fetchAllProducts', () => {
       {
         id: 2,
         categoryId: 20,
+        categoryName: 'Accessories',
         name: 'Camera Bag',
         description: 'Protective bag',
         price: 50_00,

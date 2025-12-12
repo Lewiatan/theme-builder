@@ -99,50 +99,26 @@ describe('calculateInsertionPoint', () => {
       mockElements.set('comp-3', { top: 320, bottom: 420, height: 100 });
     });
 
-    it('should insert before component when cursor is in top half', () => {
+    it('should insert below component when cursor is over it', () => {
       const result = calculateInsertionPoint({
-        cursorY: 130, // Top half of comp-1 (center is at 150)
+        cursorY: 130, // Over comp-1
         componentIds: ['comp-1', 'comp-2', 'comp-3'],
       });
 
       expect(result).toEqual({
-        insertionIndex: 0, // Before comp-1
+        insertionIndex: 1, // After comp-1 (always insert below)
         hoveredComponentId: 'comp-1',
       });
     });
 
-    it('should insert after component when cursor is in bottom half', () => {
+    it('should handle middle component correctly', () => {
       const result = calculateInsertionPoint({
-        cursorY: 170, // Bottom half of comp-1 (center is at 150)
+        cursorY: 260, // Over comp-2
         componentIds: ['comp-1', 'comp-2', 'comp-3'],
       });
 
       expect(result).toEqual({
-        insertionIndex: 1, // After comp-1
-        hoveredComponentId: 'comp-1',
-      });
-    });
-
-    it('should handle middle component correctly - top half', () => {
-      const result = calculateInsertionPoint({
-        cursorY: 230, // Top half of comp-2 (center is at 260)
-        componentIds: ['comp-1', 'comp-2', 'comp-3'],
-      });
-
-      expect(result).toEqual({
-        insertionIndex: 1, // Before comp-2
-        hoveredComponentId: 'comp-2',
-      });
-    });
-
-    it('should handle middle component correctly - bottom half', () => {
-      const result = calculateInsertionPoint({
-        cursorY: 280, // Bottom half of comp-2 (center is at 260)
-        componentIds: ['comp-1', 'comp-2', 'comp-3'],
-      });
-
-      expect(result).toEqual({
-        insertionIndex: 2, // After comp-2
+        insertionIndex: 2, // After comp-2 (always insert below)
         hoveredComponentId: 'comp-2',
       });
     });
@@ -155,41 +131,30 @@ describe('calculateInsertionPoint', () => {
       mockElements.set('comp-3', { top: 320, bottom: 420, height: 100 });
     });
 
-    it('should prevent self-insertion when dragging top half of own component', () => {
+    it('should skip own component when dragging', () => {
       const result = calculateInsertionPoint({
-        cursorY: 130, // Top half of comp-1
+        cursorY: 150, // Over comp-1
         componentIds: ['comp-1', 'comp-2', 'comp-3'],
         draggedComponentId: 'comp-1',
       });
 
-      // When dragging own component, algorithm continues to search
-      // Falls through to fallback which returns end of list
-      expect(result.insertionIndex).toBeGreaterThanOrEqual(0);
-      expect(result.insertionIndex).toBeLessThanOrEqual(3);
-    });
-
-    it('should handle dragging bottom half of own component', () => {
-      const result = calculateInsertionPoint({
-        cursorY: 170, // Bottom half of comp-1
-        componentIds: ['comp-1', 'comp-2', 'comp-3'],
-        draggedComponentId: 'comp-1',
-      });
-
+      // When dragging own component, algorithm skips it and continues to search
+      // Cursor is only over comp-1, so falls through to fallback which returns end of list
       expect(result).toEqual({
-        insertionIndex: 1,
-        hoveredComponentId: 'comp-1',
+        insertionIndex: 3,
+        hoveredComponentId: null,
       });
     });
 
-    it('should allow insertion before/after other components when dragging', () => {
+    it('should allow insertion after other components when dragging', () => {
       const result = calculateInsertionPoint({
-        cursorY: 230, // Top half of comp-2
+        cursorY: 260, // Over comp-2
         componentIds: ['comp-1', 'comp-2', 'comp-3'],
         draggedComponentId: 'comp-1', // Dragging comp-1 over comp-2
       });
 
       expect(result).toEqual({
-        insertionIndex: 1, // Before comp-2
+        insertionIndex: 2, // After comp-2 (always insert below)
         hoveredComponentId: 'comp-2',
       });
     });
@@ -200,26 +165,14 @@ describe('calculateInsertionPoint', () => {
       mockElements.set('comp-1', { top: 100, bottom: 200, height: 100 });
     });
 
-    it('should allow insertion before single component', () => {
+    it('should insert after single component when hovering over it', () => {
       const result = calculateInsertionPoint({
-        cursorY: 120, // Top half
+        cursorY: 150, // Over comp-1
         componentIds: ['comp-1'],
       });
 
       expect(result).toEqual({
-        insertionIndex: 0,
-        hoveredComponentId: 'comp-1',
-      });
-    });
-
-    it('should allow insertion after single component', () => {
-      const result = calculateInsertionPoint({
-        cursorY: 180, // Bottom half
-        componentIds: ['comp-1'],
-      });
-
-      expect(result).toEqual({
-        insertionIndex: 1,
+        insertionIndex: 1, // After comp-1 (always insert below)
         hoveredComponentId: 'comp-1',
       });
     });
@@ -266,7 +219,7 @@ describe('calculateInsertionPoint', () => {
       });
 
       expect(result).toEqual({
-        insertionIndex: 0,
+        insertionIndex: 1, // After comp-1 (always insert below)
         hoveredComponentId: 'comp-1',
       });
     });
@@ -278,7 +231,7 @@ describe('calculateInsertionPoint', () => {
       });
 
       expect(result).toEqual({
-        insertionIndex: 1,
+        insertionIndex: 1, // After comp-1 (always insert below)
         hoveredComponentId: 'comp-1',
       });
     });
@@ -289,9 +242,10 @@ describe('calculateInsertionPoint', () => {
         componentIds: ['comp-1', 'comp-2'],
       });
 
-      // At exact center, should be in top half (< center)
-      expect(result.insertionIndex).toBeLessThanOrEqual(1);
-      expect(result.hoveredComponentId).toBe('comp-1');
+      expect(result).toEqual({
+        insertionIndex: 1, // After comp-1 (always insert below)
+        hoveredComponentId: 'comp-1',
+      });
     });
   });
 
@@ -311,15 +265,14 @@ describe('calculateInsertionPoint', () => {
     it('should correctly calculate insertion for component in middle of large layout', () => {
       const componentIds = Array.from({ length: 10 }, (_, i) => `comp-${i}`);
 
-      // comp-4: top=540, bottom=640, center=590
       // comp-5: top=650, bottom=750, center=700
       const result = calculateInsertionPoint({
-        cursorY: 670, // Top half of comp-5 (center at 700)
+        cursorY: 700, // Over comp-5
         componentIds,
       });
 
       expect(result).toEqual({
-        insertionIndex: 5, // Before comp-5
+        insertionIndex: 6, // After comp-5 (always insert below)
         hoveredComponentId: 'comp-5',
       });
     });
